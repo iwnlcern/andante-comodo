@@ -1,0 +1,137 @@
+.post-prose .sidenote {
+  display: none;
+  /* a sidenote floats in the margin; never inherit italics from an italic blockquote it's anchored in */
+  font-style: normal;
+}
+
+.post-prose .sn-num {
+  color: rgb(var(--color-accent));
+  font-variant-numeric: slashed-zero tabular-nums;
+  margin-right: 0.3rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.post-prose .sn-chevron {
+  position: relative;
+  z-index: 1;
+  display: block;
+  text-align: right;
+  margin-top: 0.1rem;
+  line-height: 0;
+  color: rgb(var(--color-accent));
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.post-prose .sn-chevron svg {
+  width: 1.25em;
+  height: 1.25em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.42s var(--ease-brake);
+}
+
+.post-prose .sn-chevron:focus-visible {
+  outline: 2px solid rgb(var(--color-accent));
+  border-radius: 4px;
+}
+
+.post-prose .sidenote-toggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+}
+
+/* 1366 = BREAKPOINTS.sidenote; keep in lockstep with src/config/breakpoints.mjs + SectionLens.astro. */
+@media (min-width: 1366px) {
+  .post-prose .footnotes {
+    display: none;
+  }
+
+  /* The prose column is the positioning context for absolutely-placed sidenotes. */
+  .post-prose {
+    position: relative;
+  }
+
+  /* Sidenotes are absolutely positioned (not floated) so they never fight content floats
+     (e.g. a float-right image) for the right lane. SectionLens.astro sets each note's `top` to
+     align with its reference, then de-overlaps adjacent notes (the job clear:right used to do).
+     Horizontal geometry derives from --measure-half so changing --measure stays safe:
+       --sn-edge   gap from the note's right edge to the viewport edge
+       --sn-gutter gap between the prose column and the note
+       --sn-max    note's own max width
+     At the default measure this preserves the prior right-edge and gutter behavior. */
+  .post-prose .sidenote {
+    --sn-edge: 3rem;
+    --sn-gutter: 1rem;
+    --sn-max: 26rem;
+    display: block;
+    position: absolute;
+    top: 0;
+    right: calc(var(--measure-half) + var(--sn-edge) - 50vw);
+    width: min(var(--sn-max), calc(50vw - var(--measure-half) - var(--sn-edge) - var(--sn-gutter)));
+    font-size: var(--note-scale);
+    line-height: 1.5;
+    color: rgb(var(--color-text-secondary));
+    text-align: left;
+  }
+
+  .post-prose .sidenote:hover {
+    color: rgb(var(--color-text-primary) / 0.9);
+  }
+
+  .post-prose .sidenote .sn-body {
+    display: block;
+    position: relative;
+  }
+
+  .post-prose .sidenote.is-long .sn-body {
+    max-height: 5.2em;
+    overflow: hidden;
+    transition: max-height 0.42s var(--ease-brake);
+    -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent);
+    mask-image: linear-gradient(180deg, #000 60%, transparent);
+  }
+
+  .post-prose .sidenote.is-long .sidenote-toggle:checked ~ .sn-body {
+    max-height: 40em;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .post-prose .sidenote.is-long.is-open .sn-body {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .post-prose .sidenote.is-long .sidenote-toggle:checked ~ .sn-chevron svg,
+  .post-prose .sidenote.is-long.is-open .sn-chevron svg {
+    transform: rotate(180deg);
+  }
+
+  .post-prose .sidenote-toggle:focus-visible ~ .sn-chevron {
+    outline: 2px solid rgb(var(--color-accent));
+    border-radius: 4px;
+  }
+}
+
+/* No-JS fallback: SectionLens.astro positions absolute sidenotes vertically; without JS they
+   pile at top:0 and the expand <label> is unclickable. Under scripting:none, return notes to
+   static flow so the CSS-only checkbox toggle (:checked ~ .sn-body, above) stays usable.
+   1366 = BREAKPOINTS.sidenote; keep in lockstep with src/config/breakpoints.mjs + SectionLens.astro. */
+@media (min-width: 1366px) and (scripting: none) {
+  .post-prose .sidenote {
+    position: static;
+    width: auto;
+    margin-block: calc(var(--rhythm) * 0.5);
+  }
+}

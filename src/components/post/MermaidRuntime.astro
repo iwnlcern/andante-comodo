@@ -1,0 +1,72 @@
+---
+// Client-side Mermaid runtime. Processed (Vite-bundled) so `import('mermaid')`
+// resolves and code-splits; the chunk is fetched only when a .mermaid block exists.
+---
+
+<script>
+  const themeFor = () => (document.documentElement.dataset.theme === 'light' ? 'neutral' : 'dark');
+
+  const initMermaid = async () => {
+    if (typeof window.__mermaidCleanup === 'function') window.__mermaidCleanup();
+    const gen = (window.__mermaidGen = (window.__mermaidGen ?? 0) + 1);
+
+    const nodes = Array.from(document.querySelectorAll('.mermaid'));
+    if (!nodes.length) return;
+
+    nodes.forEach((el) => {
+      if (!el.dataset.mermaidSrc) el.dataset.mermaidSrc = el.textContent.trim();
+    });
+
+    let mermaid;
+    try {
+      ({ default: mermaid } = await import('mermaid'));
+    } catch {
+      return;
+    }
+    if (gen !== window.__mermaidGen) return;
+
+    document.documentElement.dataset.mermaidActive = 'true';
+
+    const render = async () => {
+      const els = Array.from(document.querySelectorAll('.mermaid'));
+      els.forEach((el) => {
+        el.textContent = el.dataset.mermaidSrc || '';
+        el.removeAttribute('data-processed');
+        el.removeAttribute('data-mermaid-error');
+      });
+
+      mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: themeFor() });
+
+      for (const el of els) {
+        try {
+          await mermaid.run({ nodes: [el] });
+        } catch {
+          el.textContent = el.dataset.mermaidSrc || '';
+          el.setAttribute('data-mermaid-error', 'true');
+        }
+      }
+      document.dispatchEvent(new Event('mermaid:rendered'));
+    };
+
+    await render();
+    if (gen !== window.__mermaidGen) return;
+
+    const observer = new MutationObserver((mutations) => {
+      if (mutations.some((mutation) => mutation.attributeName === 'data-theme')) render();
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+    window.__mermaidCleanup = () => {
+      observer.disconnect();
+      delete document.documentElement.dataset.mermaidActive;
+      delete window.__mermaidCleanup;
+    };
+  };
+
+  if (!window.__mermaidBound) {
+    window.__mermaidBound = true;
+    document.addEventListener('astro:after-swap', initMermaid);
+  }
+
+  initMermaid();
+</script>

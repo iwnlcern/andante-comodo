@@ -1,0 +1,28 @@
+---
+import { enabledCollections } from '#lib/content/collection-registry.mjs';
+import BlogIndexBody from '#components/collection/BlogIndexBody.astro';
+import GardenIndexBody from '#components/collection/GardenIndexBody.astro';
+import ProjectsIndexBody from '#components/collection/ProjectsIndexBody.astro';
+import WorksIndexBody from '#components/collection/WorksIndexBody.astro';
+import ReadingIndexBody from '#components/collection/ReadingIndexBody.astro';
+
+export function getStaticPaths() {
+  return enabledCollections().map((entry) => ({ params: { collection: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const bodies = {
+  blog: BlogIndexBody,
+  garden: GardenIndexBody,
+  projects: ProjectsIndexBody,
+  works: WorksIndexBody,
+  reading: ReadingIndexBody,
+};
+const Body = bodies[entry.id];
+
+if (!Body) {
+  throw new Error(`No listing body component for collection "${entry.id}"`);
+}
+---
+
+<Body entry={entry} />

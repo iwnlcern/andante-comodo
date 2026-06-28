@@ -1,0 +1,128 @@
+.lb {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: rgb(0 0 0 / 0.92);
+}
+
+.lb.open {
+  display: flex;
+}
+
+.lb img {
+  max-width: 82vw;
+  max-height: 74vh;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+/* Mermaid diagrams expand into the lightbox too (cloned inline SVG, on a theme-surface card
+   so the themed diagram stays readable against the dark backdrop). */
+.post-prose .mermaid { cursor: zoom-in; }
+.lb .lb-svg {
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow: hidden;
+  background: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-border));
+  border-radius: 10px;
+  padding: 1.5rem;
+}
+.lb .lb-svg svg {
+  display: block;
+}
+
+.lb .lb-meta {
+  /* Flows directly under the media — the .lb flex column centers the [media + caption]
+     group — instead of being pinned to the viewport bottom, so the caption stays with the image. */
+  max-width: 80vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+/* Lightbox text scales with the UI knob (--ui-base, tokens.css). Ratios preserve the
+   current sizes at the 1.33rem base: cap ~21px, credit ~18px, counter ~15px. */
+.lb .cap {
+  color: #eee;
+  font-size: calc(var(--ui-base) * 0.94);
+  text-align: center;
+  background: rgb(0 0 0 / 0.4);
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+}
+.lb .lb-credit {
+  color: #bbb;
+  font-size: calc(var(--ui-base) * 0.83);
+  text-align: center;
+}
+.lb .cap:empty,
+.lb .lb-credit:empty {
+  display: none;
+}
+
+.lb .count {
+  position: fixed;
+  top: 1.1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #bbb;
+  font-variant-numeric: slashed-zero tabular-nums;
+  font-size: calc(var(--ui-base) * 0.714);
+}
+
+.lb button {
+  position: fixed;
+  background: rgb(255 255 255 / 0.08);
+  border: 1px solid rgb(255 255 255 / 0.18);
+  color: #fff;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.lb button:hover {
+  background: rgb(255 255 255 / 0.16);
+}
+
+.lb button:focus-visible {
+  outline: 2px solid rgb(var(--color-accent));
+  outline-offset: 3px;
+}
+
+.lb .close {
+  top: 1rem;
+  right: 1rem;
+}
+
+.lb .prev {
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.lb .next {
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.lb .close svg,
+.lb .prev svg,
+.lb .next svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

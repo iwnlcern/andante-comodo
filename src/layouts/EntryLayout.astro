@@ -1,0 +1,65 @@
+---
+import 'katex/dist/katex.min.css';
+import BaseLayout from './BaseLayout.astro';
+import RichProseTools from '#components/post/RichProseTools.astro';
+import TableOfContents from '#components/post/TableOfContents.astro';
+import SectionLens from '#components/post/SectionLens.astro';
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  width?: 'prose' | 'full';
+  backHref?: string;
+  backLabel?: string;
+  post?: boolean;
+  image?: string;
+  readingApparatus?: boolean;
+  headings?: Heading[];
+}
+
+const {
+  title,
+  description,
+  width = 'prose',
+  backHref,
+  backLabel,
+  post = false,
+  image,
+  readingApparatus = false,
+  headings = [],
+} = Astro.props;
+---
+
+<BaseLayout title={title} description={description} image={image} wide={width === 'full'} post={post || readingApparatus}>
+  {readingApparatus && <div class="rt-progress" id="rtProgress" aria-hidden="true"></div>}
+  <article class={width === 'full' ? 'w-full' : 'relative mx-auto w-full max-w-[var(--measure)]'}>
+    <header class="mb-8">
+      {backHref && (
+        <a href={backHref} class="text-sm text-text-secondary hover:text-accent mb-4 inline-block">
+          &larr; {backLabel}
+        </a>
+      )}
+      <h1 class="entry-title font-display">{title}</h1>
+      <slot name="meta" />
+    </header>
+    {readingApparatus && (
+      <Fragment>
+        <TableOfContents headings={headings} variant="mobile" />
+        <nav class="top-toc" data-top-toc><h3>Contents</h3><ul class="toc-list" data-toc></ul></nav>
+      </Fragment>
+    )}
+    <slot name="before-body" />
+    <div class="prose post-prose max-w-none">
+      <slot />
+    </div>
+  </article>
+  <slot name="tools" />
+  <RichProseTools />
+  {readingApparatus && <SectionLens />}
+</BaseLayout>

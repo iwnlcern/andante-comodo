@@ -1,0 +1,82 @@
+.prose code,
+.prose pre {
+  font-family: var(--font-code);
+}
+
+/* Code reads a touch smaller than prose: monospace (Comic Mono) has a larger x-height, so
+   equal em looks oversized next to the serif body. em → scales with --prose-size. Set on pre
+   only (not code) so block code inherits it once and the size isn't applied twice. */
+.prose pre {
+  font-size: var(--code-scale);
+}
+
+/* inline code: a traditional boxed token (not Tailwind's literal-backtick style) */
+.prose :not(pre) > code {
+  background: rgb(var(--color-surface-muted));
+  border: 1px solid rgb(var(--color-border));
+  border-radius: 0.35rem;
+  padding: 0.08em 0.34em;
+  font-size: var(--code-scale);
+  font-weight: 400;
+  /* accent blue: lighter in dark mode, darker in light mode (themed token) */
+  color: rgb(var(--color-accent));
+}
+.prose :not(pre) > code::before,
+.prose :not(pre) > code::after {
+  content: none;
+}
+
+.post-prose figure.post-figure figcaption {
+  margin-top: 0.75rem;
+  /* em (not rem) so captions sit relative to the prose body and scale with --prose-size.
+     Was 0.85rem (~13.6px, root-relative) which read far too small under the larger body. */
+  font-size: var(--note-scale);
+  line-height: 1.4;
+  color: rgb(var(--color-text-secondary));
+  text-align: center;
+}
+
+.post-prose :is(h2, h3, h4) a.head-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.post-prose :is(h2, h3, h4) a.head-link:focus-visible {
+  outline: 2px solid rgb(var(--color-accent));
+  border-radius: 6px;
+}
+
+.post-prose .hash {
+  margin-left: 0.4rem;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  color: rgb(var(--color-text-secondary));
+  opacity: 0.25;
+  transition: opacity 0.15s, color 0.15s;
+  user-select: none;
+  cursor: pointer;
+  text-decoration: none;
+  text-shadow: none;
+  filter: none;
+}
+
+.post-prose :is(h2, h3, h4):hover .hash,
+.post-prose figure.post-figure:hover .hash {
+  opacity: 1;
+  color: rgb(var(--color-accent));
+}
+
+.post-prose figure.post-figure {
+  position: relative;
+}
+
+.post-prose figcaption .hash {
+  margin-left: 0.35rem;
+}
+
+.post-prose :is(h2, h3, h4),
+.post-prose figure.post-figure,
+.post-prose sup [id^='user-content-fnref'],
+.post-prose sup a[id^='user-content-fnref'] {
+  scroll-margin-top: 6rem;
+}

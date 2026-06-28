@@ -1,0 +1,212 @@
+.top-toc {
+  position: absolute;
+  right: 100%;
+  margin-right: 1.75rem;
+  /* As wide as the left gutter allows, up to --toc-max — never clips at the 1280px breakpoint.
+     Derived from --measure so the rail tracks the column. */
+  --toc-max: 15rem;
+  --toc-inset: 2rem;
+  width: min(var(--toc-max), calc((100vw - var(--measure)) / 2 - var(--toc-inset)));
+  display: none;
+}
+
+/* 1280 = BREAKPOINTS.toc / Tailwind xl. */
+@media (min-width: 1280px) {
+  .top-toc {
+    display: block;
+  }
+}
+
+.top-toc h3,
+.lens-panel h3 {
+  margin: 0 0 0.7rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgb(var(--color-text-secondary));
+}
+
+.lens-rail {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3.4rem;
+  z-index: 40;
+  display: none;
+  opacity: var(--lens-in, 0);
+  pointer-events: none;
+}
+
+/* 1280 = BREAKPOINTS.toc / Tailwind xl. */
+@media (min-width: 1280px) {
+  .lens-rail {
+    display: block;
+  }
+}
+
+.lens-rail.interactive {
+  pointer-events: auto;
+}
+
+.lens {
+  position: fixed;
+  left: 1.5rem;
+  top: 50%;
+  width: 0;
+  height: 0;
+}
+
+.lens .dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  border-radius: 50%;
+  background: rgb(var(--color-accent));
+  transform: translateY(calc(var(--y) * 1px)) scale(var(--s, 0.3));
+  opacity: var(--o, 0);
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lens .dot.upcoming {
+  background: rgb(var(--color-text-secondary));
+}
+
+.lens .dot.active {
+  box-shadow: 0 0 0 4px rgb(var(--color-accent) / 0.22), 0 0 14px rgb(var(--color-accent) / 0.5);
+}
+
+.lens-panel {
+  position: fixed;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%) translateX(-10px) scale(0.98);
+  width: 17rem;
+  max-height: 76vh;
+  overflow-y: auto;
+  background: rgb(var(--color-surface) / 0.97);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgb(var(--color-border));
+  border-radius: 12px;
+  padding: 1rem 0.9rem;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 16px 50px rgb(0 0 0 / 0.38);
+  transition: opacity 0.2s ease, transform 0.32s var(--ease-brake);
+}
+
+.lens-rail:hover .lens-panel,
+.lens-rail.pinned .lens-panel {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) translateX(0) scale(1);
+}
+
+.lens-rail:hover .lens,
+.lens-rail.pinned .lens {
+  opacity: 0;
+}
+
+.toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc-list a {
+  display: block;
+  padding: 0.26rem 0.5rem;
+  border-radius: 6px;
+  color: rgb(var(--color-text-secondary));
+  text-decoration: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+  font-size: 1.05rem;
+  border-left: 2px solid transparent;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.toc-list a[data-depth='3'] {
+  padding-left: 1.5rem;
+  font-size: 1rem;
+}
+
+.toc-list a[data-depth='4'] {
+  padding-left: 2.4rem;
+  font-size: 0.95rem;
+}
+
+.toc-list a:hover {
+  color: rgb(var(--color-text-primary));
+  background: rgb(var(--color-surface-muted));
+}
+
+.toc-list a.active {
+  color: rgb(var(--color-accent));
+  border-left-color: rgb(var(--color-accent));
+  background: rgb(var(--color-accent) / 0.08);
+}
+
+/* collapsible TOC groups (Wikipedia-style): each L2 with subsections gets a chevron */
+.toc-row {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+.toc-row > a {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.toc-chevron {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+  color: rgb(var(--color-text-secondary));
+}
+.toc-chevron:hover {
+  color: rgb(var(--color-accent));
+  background: rgb(var(--color-surface-muted));
+}
+.toc-chevron:focus-visible {
+  outline: 2px solid rgb(var(--color-accent));
+  outline-offset: 1px;
+}
+.toc-chevron svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.25s var(--ease-brake);
+}
+.toc-group.collapsed .toc-chevron svg {
+  transform: rotate(-90deg);
+}
+.toc-sub {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.28s var(--ease-brake);
+}
+.toc-group.collapsed .toc-sub {
+  grid-template-rows: 0fr;
+}
+.toc-sub > ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+  overflow: hidden;
+}

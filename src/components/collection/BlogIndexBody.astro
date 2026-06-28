@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import CollectionIndex from '#components/collection/CollectionIndex.astro';
+import NewsletterSignup from '#components/newsletter/NewsletterSignup.astro';
+import { blogItem, byDate, dropEmptySections } from '#lib/content/collection-items';
+import { taxonomyLabel } from '#lib/content/collection-registry.mjs';
+import type { IndexSection } from '#lib/content/collection-index';
+
+interface Props {
+  entry: {
+    label: string;
+    description?: string;
+  };
+}
+
+const { entry } = Astro.props;
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(byDate);
+const categories = ['technical', 'slice-of-life', 'rants'] as const;
+
+const sections: IndexSection[] = dropEmptySections(
+  categories.map((category) => ({
+    label: taxonomyLabel('blog', category),
+    variant: 'rows' as const,
+    scope: `blog-${category}`,
+    items: posts.filter((post) => post.data.category === category).map(blogItem),
+  }))
+).sort((a, b) => (b.items[0].date?.valueOf() ?? 0) - (a.items[0].date?.valueOf() ?? 0));
+---
+
+<CollectionIndex title={entry.label} description={entry.description} sections={sections}>
+  <div class="mt-12">
+    <NewsletterSignup />
+  </div>
+</CollectionIndex>

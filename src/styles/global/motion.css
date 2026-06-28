@@ -1,0 +1,11 @@
+@media (prefers-reduced-motion: reduce) {
+  .lens .dot,
+  .post-prose .sn-body,
+  .post-prose .sn-chevron svg,
+  .toc-sub,
+  .toc-chevron svg,
+  .post-prose .collapse-chevron svg,
+  .post-prose .collapse-content {
+    transition: none;
+  }
+}

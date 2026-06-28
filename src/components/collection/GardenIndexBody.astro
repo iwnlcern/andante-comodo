@@ -1,0 +1,54 @@
+---
+import { getCollection } from 'astro:content';
+import CollectionIndex from '#components/collection/CollectionIndex.astro';
+import Tag from '#components/common/Tag.astro';
+import TagFilter from '#components/collection/TagFilter.astro';
+import { taxonomyLabel } from '#lib/content/collection-registry.mjs';
+import type { IndexSection } from '#lib/content/collection-index';
+
+interface Props {
+  entry: {
+    label: string;
+    description?: string;
+    slug: string;
+  };
+}
+
+const { entry } = Astro.props;
+
+const allGarden = await getCollection('garden');
+const notes = allGarden.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const order = ['til', 'resource', 'note'] as const;
+const allTags = [...new Set(notes.flatMap((note) => note.data.tags.map((tag) => tag.toLowerCase())))].sort();
+
+const sections: IndexSection[] = order
+  .map((type) => ({
+    label: taxonomyLabel('garden', type),
+    variant: 'rows' as const,
+    items: notes
+      .filter((note) => note.data.type === type)
+      .map((note) => ({
+        title: note.data.title,
+        href: type === 'resource' && note.data.link ? note.data.link : `${entry.slug}/${note.id}`,
+        date: note.data.date,
+        tags: note.data.tags,
+        external: type === 'resource' && Boolean(note.data.link),
+      })),
+  }))
+  .filter((section) => section.items.length > 0);
+---
+
+<CollectionIndex
+  title={entry.label}
+  description={entry.description}
+  sections={sections}
+  filterable
+  filterScope="garden"
+>
+  <Fragment slot="controls">
+    <div class="mb-4 flex flex-wrap gap-2">
+      {allTags.map((tag) => <Tag tag={tag} interactive />)}
+    </div>
+    <TagFilter />
+  </Fragment>
+</CollectionIndex>

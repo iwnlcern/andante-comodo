@@ -1,0 +1,471 @@
+<div class="lens-rail" id="lensRail">
+  <div class="lens" data-lens></div>
+  <nav class="lens-panel"><h3>Contents</h3><ul class="toc-list" data-toc></ul></nav>
+</div>
+
+<script>
+  import { BREAKPOINTS } from '#config/breakpoints.mjs';
+
+  const initSectionLens = () => {
+    window.__sectionLensCleanup?.();
+
+    const docEl = document.documentElement;
+    const article = document.querySelector('.post-prose');
+    const rail = document.getElementById('lensRail');
+    const lens = document.querySelector('[data-lens]');
+    const bar = document.getElementById('rtProgress');
+    if (!article || !rail || !lens) {
+      window.__sectionLensCleanup = undefined;
+      return;
+    }
+
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const heads = [...article.querySelectorAll('h2, h3, h4')].filter((h) => h.id && h.id !== 'footnote-label');
+    // prepend the post title (the article <header> <h1>, outside .post-prose) as the intro entry,
+    // so the TOC and lens start at the top of the post
+    const title = article.closest('article')?.querySelector('header h1');
+    if (title) {
+      if (!title.id) title.id = 'top';
+      heads.unshift(title);
+    }
+    const topToc = document.querySelector('.top-toc');
+    const tocLists = [...document.querySelectorAll('[data-toc]')];
+    const cleanups = [];
+    let alive = true; // false after teardown — guards uncancelable async (e.g. fonts.ready)
+    const add = (target, event, handler, options) => {
+      target.addEventListener(event, handler, options);
+      cleanups.push(() => target.removeEventListener(event, handler, options));
+    };
+
+    const labelFor = (heading) => {
+      const link = heading.querySelector('.head-link');
+      return (link?.textContent || heading.textContent || '').replace(/#\s*$/, '').trim();
+    };
+    // the prepended article title (an <h1>) reads as "Intro" in the TOC/lens
+    const tocLabel = (heading) => (heading.tagName === 'H1' ? 'Intro' : labelFor(heading));
+
+    lens.textContent = '';
+    for (const list of tocLists) list.textContent = '';
+
+    const HEADROOM = 96;
+    const smootherstep = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * t * (t * (t * 6 - 15) + 10));
+    const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+    const FLY = { arrive: { dur: 1200, ease: smootherstep }, click: { dur: 560, ease: easeOut } };
+    const DOT_VERTICAL_STEP = 19; // px between dots
+    const DOT_RADIUS = 7; // dots of influence around active
+    const ACTIVE_ZONE_RATIO = 0.32; // active band = top 32% of viewport
+    const DOT_MIN_SCALE = 0.28; // scale floor at the radius edge
+    const DOT_SCALE_DECAY = 0.16; // per-dot scale falloff
+    let tweenId = 0;
+
+    const flyTo = (id, mode = 'click', onDone) => {
+      const thisTween = ++tweenId;
+      const el = document.getElementById(id);
+      if (!el) {
+        onDone?.();
+        return;
+      }
+
+      const prevBehavior = docEl.style.scrollBehavior;
+      docEl.style.scrollBehavior = 'auto';
+      if (mode === 'arrive') {
+        history.scrollRestoration = 'manual';
+        scrollTo(0, 0);
+      }
+
+      const from = window.scrollY;
+      const maxScroll = Math.max(0, docEl.scrollHeight - innerHeight);
+      const dest = Math.min(maxScroll, Math.max(0, el.getBoundingClientRect().top + window.scrollY - HEADROOM));
+      const restore = () => {
+        docEl.style.scrollBehavior = prevBehavior;
+      };
+      const delta = dest - from;
+
+      if (reduce || Math.abs(delta) < 2) {
+        scrollTo(0, dest);
+        restore();
+        onDone?.();
+        return;
+      }
+
+      const { dur, ease } = FLY[mode];
+      const start = performance.now();
+      requestAnimationFrame(function step(now) {
+        if (thisTween !== tweenId) return;
+        const t = Math.min(1, (now - start) / dur);
+        scrollTo(0, from + delta * ease(t));
+        if (t < 1) requestAnimationFrame(step);
+        else {
+          scrollTo(0, dest);
+          restore();
+          onDone?.();
+        }
+      });
+    };
+
+    const dotEls = heads.map((heading) => {
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      dot.title = tocLabel(heading);
+      const onDotClick = () => {
+        history.pushState(null, '', `#${heading.id}`);
+        flyTo(heading.id, 'click');
+      };
+      dot.addEventListener('click', onDotClick);
+      cleanups.push(() => dot.removeEventListener('click', onDotClick));
+      lens.appendChild(dot);
+      return dot;
+    });
+
+    const chevronProto = (() => {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      svg.setAttribute('aria-hidden', 'true');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', 'M6 9l6 6 6-6');
+      svg.appendChild(path);
+      return svg;
+    })();
+
+    for (const list of tocLists) {
+      let groupLi = null; // current L2 <li>
+      let subUl = null; // its child <ul>, created lazily when a subheading appears
+      for (const heading of heads) {
+        const depth = heading.tagName === 'H3' ? 3 : heading.tagName === 'H4' ? 4 : 2;
+        const link = document.createElement('a');
+        link.href = `#${heading.id}`;
+        link.textContent = tocLabel(heading);
+        link.dataset.for = heading.id;
+        link.dataset.depth = String(depth);
+
+        if (depth === 2) {
+          groupLi = document.createElement('li');
+          groupLi.className = 'toc-group';
+          const row = document.createElement('div');
+          row.className = 'toc-row';
+          row.appendChild(link);
+          groupLi.appendChild(row);
+          list.appendChild(groupLi);
+          subUl = null;
+        } else if (groupLi) {
+          if (!subUl) {
+            // first subheading under this L2 — add the collapse chevron + sub-list wrapper
+            const wrap = document.createElement('div');
+            wrap.className = 'toc-sub';
+            subUl = document.createElement('ul');
+            wrap.appendChild(subUl);
+            groupLi.appendChild(wrap);
+
+            const ownerLi = groupLi; // snapshot — groupLi is reassigned each L2 iteration
+            ownerLi.classList.add('collapsed'); // start collapsed (expand on demand)
+            const chevron = document.createElement('button');
+            chevron.type = 'button';
+            chevron.className = 'toc-chevron';
+            chevron.setAttribute('aria-label', 'Toggle subsections');
+            chevron.setAttribute('aria-expanded', 'false');
+            chevron.appendChild(chevronProto.cloneNode(true));
+            const onToggle = (event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              const collapsed = ownerLi.classList.toggle('collapsed');
+              chevron.setAttribute('aria-expanded', String(!collapsed));
+            };
+            chevron.addEventListener('click', onToggle);
+            cleanups.push(() => chevron.removeEventListener('click', onToggle));
+            ownerLi.querySelector('.toc-row').appendChild(chevron);
+          }
+          const childLi = document.createElement('li');
+          childLi.appendChild(link);
+          subUl.appendChild(childLi);
+        } else {
+          const li = document.createElement('li');
+          li.appendChild(link);
+          list.appendChild(li);
+        }
+      }
+    }
+
+    const positionTopToc = () => {
+      if (!topToc) return;
+      const articleEl = article.closest('article');
+      const header = articleEl?.querySelector('header');
+      topToc.style.top = `${header ? header.offsetTop : 0}px`;
+    };
+
+    const update = () => {
+      if (topToc) {
+        const tb = topToc.getBoundingClientRect().bottom;
+        const lensIn = Math.min(1, Math.max(0, (0.2 * innerHeight - tb) / (0.4 * innerHeight)));
+        rail.style.setProperty('--lens-in', lensIn.toFixed(3));
+        if (bar) bar.style.setProperty('--rt-in', lensIn.toFixed(3));
+        rail.classList.toggle('interactive', lensIn >= 0.99);
+      }
+
+      if (bar) {
+        const maxScroll = docEl.scrollHeight - innerHeight;
+        const progress = maxScroll > 0 ? Math.min(1, Math.max(0, scrollY / maxScroll)) : 0;
+        bar.style.setProperty('--rt-progress', progress.toFixed(4));
+      }
+
+      let pos = 0;
+      for (let i = 0; i < heads.length; i += 1) {
+        const top = heads[i].getBoundingClientRect().top;
+        if (top <= innerHeight * ACTIVE_ZONE_RATIO) {
+          const next = heads[i + 1];
+          if (next) {
+            const span = next.getBoundingClientRect().top - top;
+            pos = i + (span > 0 ? Math.min(1, Math.max(0, (innerHeight * ACTIVE_ZONE_RATIO - top) / span)) : 0);
+          } else {
+            pos = i;
+          }
+        }
+      }
+      if (innerHeight + scrollY >= docEl.scrollHeight - 2) pos = heads.length - 1;
+
+      const activeIndex = Math.round(pos);
+      dotEls.forEach((dot, i) => {
+        const dist = Math.abs(i - pos);
+        dot.style.setProperty('--y', ((i - pos) * DOT_VERTICAL_STEP).toFixed(2));
+        dot.style.setProperty('--s', Math.max(DOT_MIN_SCALE, 1 - dist * DOT_SCALE_DECAY).toFixed(3));
+        dot.style.setProperty('--o', Math.max(0, 1 - dist / DOT_RADIUS).toFixed(3));
+        dot.classList.toggle('active', i === activeIndex);
+        dot.classList.toggle('upcoming', i > activeIndex);
+      });
+      tocLinks.forEach((link) => {
+        link.classList.toggle('active', link.dataset.for === heads[activeIndex]?.id);
+      });
+    };
+
+    let ticking = false;
+    const requestUpdate = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        update();
+      });
+    };
+    const onResize = () => {
+      positionTopToc();
+      update();
+      layoutSidenotes();
+    };
+    const pinLens = () => rail.classList.add('pinned');
+    const unpinLens = () => rail.classList.remove('pinned');
+    const onAnchorClick = (event) => {
+      const anchor = event.target.closest('a[href^="#"]');
+      if (!anchor) return;
+      if (anchor.closest('.collapse-summary')) return;
+      let id;
+      try {
+        id = decodeURIComponent(anchor.getAttribute('href').slice(1));
+      } catch {
+        return;
+      }
+      if (!id || !document.getElementById(id)) return;
+      event.preventDefault();
+      history.pushState(null, '', `#${id}`);
+      flyTo(id, 'click');
+    };
+
+    const tocLinks = [...document.querySelectorAll('.toc-list a')];
+
+    add(window, 'scroll', requestUpdate, { passive: true });
+    add(window, 'resize', onResize);
+    add(lens, 'click', pinLens);
+    for (const link of tocLinks) add(link, 'click', unpinLens);
+    add(document, 'click', onAnchorClick);
+
+    const wideSN = matchMedia(`(min-width: ${BREAKPOINTS.sidenote}px)`);
+    const SN_GAP = 14; // px kept between stacked sidenotes (what clear:right gave for free)
+    // Absolutely position each sidenote at its reference's vertical offset, then push any
+    // overlapping note down. Re-run on load, resize, image/font load, and expand/collapse.
+    // Because notes are no longer floats, content floats (e.g. a float-right image in the
+    // column) no longer push them out of alignment.
+    const layoutSidenotes = () => {
+      const notes = [...article.querySelectorAll('.sidenote')];
+      if (!notes.length) return;
+      if (!wideSN.matches) {
+        notes.forEach((n) => {
+          n.style.top = '';
+        });
+        return;
+      }
+      const proseTop = article.getBoundingClientRect().top + scrollY;
+      const items = notes.map((note) => {
+        const num = note.querySelector('.sn-num');
+        let refId = '';
+        try {
+          refId = decodeURIComponent((num?.getAttribute('href') || '').slice(1));
+        } catch {
+          refId = '';
+        }
+        const ref = refId ? document.getElementById(refId) : null;
+        const desired = ref ? Math.max(0, ref.getBoundingClientRect().top + scrollY - proseTop) : 0;
+        return { note, desired };
+      });
+      items.sort((a, b) => a.desired - b.desired);
+      let prevBottom = -Infinity;
+      for (const it of items) {
+        const top = Math.max(it.desired, prevBottom + SN_GAP);
+        it.note.style.top = `${Math.round(top)}px`;
+        prevBottom = top + it.note.offsetHeight;
+      }
+    };
+
+    const clearTE = (body) => {
+      if (body._te) {
+        body.removeEventListener('transitionend', body._te);
+        body._te = null;
+      }
+    };
+    const expandNote = (sn, body) => {
+      clearTE(body);
+      sn.classList.add('is-open');
+      body.style.maxHeight = `${body.scrollHeight}px`;
+      body._te = (event) => {
+        if (event.propertyName === 'max-height') {
+          clearTE(body);
+          body.style.maxHeight = 'none';
+        }
+      };
+      body.addEventListener('transitionend', body._te);
+      sn.querySelector('.sn-chevron')?.setAttribute('aria-expanded', 'true');
+    };
+    const collapseNote = (sn, body) => {
+      clearTE(body);
+      body.style.maxHeight = `${body.scrollHeight}px`;
+      requestAnimationFrame(() => {
+        body.style.maxHeight = '';
+        sn.classList.remove('is-open');
+      });
+      sn.querySelector('.sn-chevron')?.setAttribute('aria-expanded', 'false');
+    };
+
+    const initSidenotes = () => {
+      const sidenotes = document.querySelectorAll('.post-prose .sidenote');
+      if (!sidenotes.length) return;
+      sidenotes.forEach((sn) => {
+        const body = sn.querySelector('.sn-body');
+        const num = sn.querySelector('.sn-num');
+        if (!body || !num) return;
+        const long = sn.classList.contains('is-long');
+        const checkbox = sn.querySelector('.sidenote-toggle');
+        const label = sn.querySelector('label.sn-chevron');
+        if (checkbox) checkbox.tabIndex = -1;
+        if (label) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = label.className;
+          button.setAttribute('aria-label', label.getAttribute('aria-label') || 'Expand note');
+          button.setAttribute('aria-expanded', 'false');
+          button.innerHTML = label.innerHTML;
+          label.replaceWith(button);
+        }
+        const targetId = String(num.getAttribute('href') || '').slice(1);
+        const onSidenoteClick = (event) => {
+          // Clicking the number (an <a>) snaps to the reference — handled by the global anchor
+          // handler; bail here so expansion logic doesn't also run.
+          if (event.target.closest('a')) return;
+          if (!targetId || !document.getElementById(targetId)) return;
+          if (!long) {
+            history.replaceState(null, '', `#${targetId}`);
+            flyTo(targetId, 'click');
+            return;
+          }
+          if (sn.classList.contains('is-open')) {
+            // collapse only via the chevron — clicking the body of an open note must NOT collapse it
+            if (event.target.closest('.sn-chevron')) collapseNote(sn, body);
+            return;
+          }
+          // Expand in place — don't yank the page to the note. Only nudge-scroll if the expansion
+          // pushes the note's bottom past the viewport, and never far enough to hide its top.
+          const grow = Math.max(0, body.scrollHeight - body.clientHeight);
+          const rect = sn.getBoundingClientRect();
+          expandNote(sn, body);
+          const overflow = rect.bottom + grow - (innerHeight - 16);
+          if (overflow > 0) {
+            const amount = Math.min(overflow, Math.max(0, rect.top - 16));
+            if (amount > 0) scrollBy({ top: amount, behavior: reduce ? 'auto' : 'smooth' });
+          }
+        };
+        sn.addEventListener('click', onSidenoteClick);
+        cleanups.push(() => {
+          clearTE(body);
+          sn.removeEventListener('click', onSidenoteClick);
+        });
+      });
+    };
+
+    initSidenotes();
+    layoutSidenotes();
+    // Re-layout when a note expands/collapses (height change) or late content shifts refs.
+    add(article, 'transitionend', (event) => {
+      if (event.propertyName === 'max-height' && event.target?.classList?.contains('sn-body')) {
+        layoutSidenotes();
+      }
+    });
+    article.querySelectorAll('img').forEach((img) => {
+      if (!img.complete) add(img, 'load', () => layoutSidenotes(), { once: true });
+    });
+    if (document.fonts?.ready) document.fonts.ready.then(() => { if (alive) layoutSidenotes(); });
+    add(window, 'load', () => layoutSidenotes(), { once: true });
+
+    positionTopToc();
+    update();
+
+    const arrivalId = window.__arrivalHash;
+    delete window.__arrivalHash;
+    if (arrivalId && document.getElementById(arrivalId)) {
+      history.scrollRestoration = 'manual';
+      scrollTo(0, 0);
+      const restore = () => history.replaceState(null, '', `#${arrivalId}`);
+      const runArrival = () => {
+        scrollTo(0, 0);
+        if (reduce) {
+          flyTo(arrivalId, 'arrive');
+          restore();
+          return;
+        }
+        let timer;
+        const cancelEvents = ['wheel', 'touchstart', 'keydown'];
+        const off = () => cancelEvents.forEach((event) => window.removeEventListener(event, cancel));
+        const go = () => {
+          off();
+          flyTo(arrivalId, 'arrive');
+          restore();
+        };
+        const cancel = () => {
+          clearTimeout(timer);
+          off();
+          restore();
+        };
+        timer = setTimeout(go, 900);
+        cancelEvents.forEach((event) => window.addEventListener(event, cancel, { passive: true }));
+      };
+      if (document.readyState === 'complete') requestAnimationFrame(runArrival);
+      else add(window, 'load', () => requestAnimationFrame(runArrival), { once: true });
+    }
+
+    window.__sectionLensCleanup = () => {
+      alive = false;
+      cleanups.forEach((cleanup) => cleanup());
+      lens.textContent = '';
+      for (const list of tocLists) list.textContent = '';
+      rail.classList.remove('interactive', 'pinned');
+      rail.style.removeProperty('--lens-in');
+      if (bar) {
+        bar.style.removeProperty('--rt-in');
+        bar.style.removeProperty('--rt-progress');
+      }
+      tweenId += 1;
+      delete window.__sectionLensCleanup;
+    };
+  };
+
+  initSectionLens();
+  if (!window.__sectionLensBound) {
+    window.__sectionLensBound = true;
+    document.addEventListener('astro:after-swap', initSectionLens);
+  }
+</script>

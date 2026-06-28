@@ -1,0 +1,20 @@
+---
+import { render } from 'astro:content';
+import GardenLayout from '#layouts/GardenLayout.astro';
+import { collectionPaths } from '#lib/content/collection-paths';
+
+export const getStaticPaths = () => collectionPaths('garden', { propKey: 'note' });
+
+const { note } = Astro.props;
+const { Content } = await render(note);
+---
+
+<GardenLayout
+  title={note.data.title}
+  type={note.data.type}
+  date={note.data.date}
+  tags={note.data.tags}
+  link={note.data.link}
+>
+  <Content />
+</GardenLayout>

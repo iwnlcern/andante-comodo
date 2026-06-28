@@ -1,0 +1,58 @@
+.post-prose :is(h2, h3, h4) {
+  position: relative;
+}
+
+.post-prose blockquote {
+  border-left: 3px solid rgb(var(--color-accent));
+  background: rgb(var(--color-surface-muted));
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  padding: 0.85rem 1.25rem;
+  color: rgb(var(--color-text-primary) / 0.9);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.post-prose blockquote p {
+  color: inherit;
+}
+
+.post-prose blockquote p:first-of-type::before,
+.post-prose blockquote p:last-of-type::after {
+  content: '';
+}
+
+.post-prose figure.post-figure {
+  margin: 2rem auto;
+  text-align: center;
+}
+
+.post-prose figure.post-figure img {
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.post-prose .is-photo img {
+  border-radius: 0.5rem;
+  border: 1px solid rgb(var(--color-border));
+  cursor: zoom-in;
+}
+
+.post-prose .is-diagram {
+  max-width: 36rem;
+  background: rgb(var(--color-surface-muted));
+  border: 1px solid rgb(var(--color-border));
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}
+
+.post-prose .is-diagram img {
+  max-width: 100%;
+  cursor: zoom-in;
+}
+
+/* footnote reference markers stay upright even inside italic blockquotes */
+.post-prose sup {
+  font-style: normal;
+}

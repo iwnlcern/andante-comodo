@@ -1,0 +1,39 @@
+name: RSS To listmonk
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/content/blog/**/*.md"
+      - "src/content/blog/**/*.mdx"
+  workflow_dispatch:
+
+concurrency:
+  group: rss-to-listmonk
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run RSS sync
+        env:
+          RSS_FEED_URL: ${{ secrets.RSS_FEED_URL }}
+          LISTMONK_BASE_URL: ${{ secrets.LISTMONK_BASE_URL }}
+          LISTMONK_USER: ${{ secrets.LISTMONK_USER }}
+          LISTMONK_TOKEN: ${{ secrets.LISTMONK_TOKEN }}
+          LISTMONK_FROM_EMAIL: ${{ secrets.LISTMONK_FROM_EMAIL }}
+          LISTMONK_LIST_ID: ${{ secrets.LISTMONK_LIST_ID }}
+          LISTMONK_LIST_UUID: ${{ secrets.LISTMONK_LIST_UUID }}
+          LISTMONK_TEMPLATE_ID: ${{ secrets.LISTMONK_TEMPLATE_ID }}
+          LISTMONK_CAMPAIGN_TAG_PREFIX: ${{ secrets.LISTMONK_CAMPAIGN_TAG_PREFIX }}
+        run: node tools/rss-to-listmonk.mjs

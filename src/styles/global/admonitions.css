@@ -1,0 +1,94 @@
+/* admonitions — colored callout boxes; severity encoded by dangerous-bend signposts */
+.post-prose .admonition {
+  margin: 1.5rem 0;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid rgb(var(--adm) / 0.4);
+  border-left: 4px solid rgb(var(--adm));
+  border-radius: 0.5rem;
+  background: rgb(var(--adm) / 0.1);
+  --adm: var(--color-accent);
+}
+.post-prose .admonition > :first-child {
+  margin-top: 0;
+}
+.post-prose .admonition > :last-child {
+  margin-bottom: 0;
+}
+.post-prose .admonition-title {
+  margin: 0 0 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.post-prose .admonition-title p {
+  margin: 0;
+  font-weight: 700;
+  color: rgb(var(--adm));
+  letter-spacing: 0.01em;
+}
+.post-prose .admonition-icon {
+  color: rgb(var(--adm));
+  line-height: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.12rem;
+  flex: none;
+}
+.post-prose .admonition-icon img {
+  margin: 0;
+  display: block;
+  width: auto;
+}
+.post-prose .admonition-icon .adm-icon-img {
+  height: 1.5em;
+}
+.post-prose .admonition-icon .bend-sign {
+  height: 2em;
+}
+.post-prose .adm-icon-mask {
+  display: block;
+  width: 1.5em;
+  height: 1.5em;
+  flex: none;
+  background: rgb(var(--adm));
+  -webkit-mask: var(--mask-src) center / contain no-repeat;
+  mask: var(--mask-src) center / contain no-repeat;
+}
+.post-prose .admonition.note {
+  --adm: var(--color-accent);
+}
+.post-prose .admonition.tip {
+  --adm: var(--adm-tip);
+}
+.post-prose .admonition.caution {
+  --adm: var(--adm-caution);
+}
+.post-prose .admonition.danger {
+  --adm: var(--adm-danger);
+}
+
+/* typed sidenotes (tier-3 margin admonitions) — flavor by [!TYPE] footnote marker */
+.post-prose .sidenote.type-note { --adm: var(--color-accent); }
+.post-prose .sidenote.type-tip { --adm: var(--adm-tip); }
+.post-prose .sidenote.type-caution { --adm: var(--adm-caution); }
+.post-prose .sidenote.type-danger { --adm: var(--adm-danger); }
+.post-prose .fn-type.type-note { color: rgb(var(--color-accent)); }
+.post-prose .fn-type.type-tip { color: rgb(var(--adm-tip)); }
+.post-prose .fn-type.type-caution { color: rgb(var(--adm-caution)); }
+.post-prose .fn-type.type-danger { color: rgb(var(--adm-danger)); }
+.post-prose .fn-type { font-weight: 700; margin-right: 0.35rem; }
+.post-prose .sn-icon { display: inline-flex; align-items: center; gap: 0.1rem; vertical-align: -0.18em; margin-right: 0.3rem; }
+.post-prose .sn-icon img { margin: 0; height: 1.05em; width: auto; display: inline-block; }
+.post-prose .sn-icon .adm-icon-mask {
+  width: 1.05em;
+  height: 1.05em;
+  background: rgb(var(--adm));
+  -webkit-mask: var(--mask-src) center / contain no-repeat;
+  mask: var(--mask-src) center / contain no-repeat;
+}
+
+/* 1366 = BREAKPOINTS.sidenote; keep in lockstep with src/config/breakpoints.mjs + SectionLens.astro. */
+@media (min-width: 1366px) {
+  .post-prose .sidenote.is-typed { border-left: 3px solid rgb(var(--adm)); padding-left: 0.55rem; }
+  .post-prose .sidenote.is-typed .sn-num { color: rgb(var(--adm)); }
+}

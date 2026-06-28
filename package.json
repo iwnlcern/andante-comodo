@@ -1,0 +1,56 @@
+{
+  "author": "Jack Li",
+  "bugs": {
+    "url": "https://github.com/iwnlcern/andante-comodo/issues"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^12.6.12",
+    "@astrojs/mdx": "^4.3.13",
+    "@astrojs/rss": "^4.0.15",
+    "@astrojs/sitemap": "^3.7.0",
+    "@astrojs/tailwind": "^6.0.2",
+    "@tailwindcss/typography": "^0.5.19",
+    "astro": "^5.17.1",
+    "katex": "^0.17.0",
+    "mermaid": "^11.15.0",
+    "pdfjs-dist": "^5.4.624",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
+    "tailwindcss": "^3.4.19"
+  },
+  "description": "An Astro template for a personal portfolio, long-form writing, scores, recordings, RSS feeds, and a resume.",
+  "devDependencies": {
+    "pagefind": "^1.4.0",
+    "wrangler": "^4.62.0"
+  },
+  "engines": {
+    "node": ">=20.3.0"
+  },
+  "homepage": "https://github.com/iwnlcern/andante-comodo#readme",
+  "imports": {
+    "#components/*": "./src/components/*",
+    "#config/*": "./src/config/*",
+    "#data/*": "./src/data/*",
+    "#layouts/*": "./src/layouts/*",
+    "#lib/*": "./src/lib/*",
+    "#scripts/*": "./src/scripts/*"
+  },
+  "license": "MIT",
+  "name": "andante-comodo",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iwnlcern/andante-comodo.git"
+  },
+  "scripts": {
+    "astro": "astro",
+    "build": "astro build",
+    "dev": "astro dev",
+    "postbuild": "pagefind --site dist",
+    "preview": "astro preview",
+    "rss:sync": "node tools/rss-to-listmonk.mjs",
+    "test": "node --test tests/smoke.mjs"
+  },
+  "type": "module",
+  "version": "1.0.0"
+}

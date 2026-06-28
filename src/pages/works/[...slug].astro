@@ -1,0 +1,40 @@
+---
+import { render } from 'astro:content';
+import EntryLayout from '#layouts/EntryLayout.astro';
+import ExpandableDetails from '#components/post/ExpandableDetails.astro';
+import ScorePreview from '#components/score-preview/ScorePreview.astro';
+import { collectionPaths } from '#lib/content/collection-paths';
+
+export const getStaticPaths = () => collectionPaths('works', { propKey: 'work' });
+
+const { work } = Astro.props;
+const { Content } = await render(work);
+---
+
+<EntryLayout title={work.data.title} description={`${work.data.title} (${work.data.year})`} width="full" backHref="/works" backLabel="Back to works">
+  <p slot="meta" class="text-sm text-text-secondary">{work.data.year}</p>
+  <Fragment slot="before-body">
+    {work.data.audio && (
+      <section class="mb-8">
+        <audio src={work.data.audio} controls class="w-full" preload="metadata" aria-label={`Listen to ${work.data.title}`}></audio>
+      </section>
+    )}
+
+    <section class="mb-8">
+      <ExpandableDetails
+        instrumentation={work.data.instrumentation}
+        duration={work.data.duration}
+        description={work.data.description}
+      />
+    </section>
+
+    {work.data.score && (
+      <section class="mb-8">
+        <h2 class="text-lg font-semibold mb-4">Score</h2>
+        <ScorePreview src={work.data.score} title={work.data.title} />
+      </section>
+    )}
+  </Fragment>
+
+  {Content && <Content />}
+</EntryLayout>

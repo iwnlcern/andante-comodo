@@ -1,0 +1,19 @@
+/* top reading-progress bar — fills with scroll, fades in with the lens (--rt-in = lens --lens-in) */
+.rt-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  z-index: 45;
+  transform: scaleX(var(--rt-progress, 0));
+  transform-origin: left;
+  background: rgb(var(--color-accent));
+  opacity: var(--rt-in, 0);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .rt-progress {
+    transition: opacity 0.25s ease;
+  }
+}

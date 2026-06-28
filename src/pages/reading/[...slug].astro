@@ -1,0 +1,36 @@
+---
+import { render } from 'astro:content';
+import EntryLayout from '#layouts/EntryLayout.astro';
+import Tag from '#components/common/Tag.astro';
+import Stars from '#components/common/Stars.astro';
+import { collectionPaths } from '#lib/content/collection-paths';
+import { taxonomyLabel } from '#lib/content/collection-registry.mjs';
+
+export const getStaticPaths = () =>
+  collectionPaths('reading', { propKey: 'book', filter: (entry) => entry.data.type === 'book' });
+
+const { book } = Astro.props;
+const { Content } = await render(book);
+---
+
+<EntryLayout title={book.data.title} description={`${book.data.title} by ${book.data.author}`} backHref="/reading" backLabel="Back to reading">
+  <div slot="meta">
+    <div class="flex items-center gap-4 text-sm text-text-secondary">
+      {book.data.author && <span>by {book.data.author}</span>}
+      {book.data.status && (
+        <span class="text-xs uppercase tracking-wide">{taxonomyLabel('reading', book.data.status)}</span>
+      )}
+      {book.data.rating && (
+        <Stars value={book.data.rating} />
+      )}
+    </div>
+    {book.data.tags.length > 0 && (
+      <div class="flex gap-2 mt-3">
+        {book.data.tags.map((tag) => (
+          <Tag tag={tag} href={`/tags/${tag}`} />
+        ))}
+      </div>
+    )}
+  </div>
+  {Content && <Content />}
+</EntryLayout>

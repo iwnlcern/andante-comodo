@@ -1,0 +1,17 @@
+/* Concern partials, imported in source order. Vite inlines these at build before
+   Tailwind; base-layered.css MUST be first (it carries @tailwind + @layer). */
+@import './global/base-layered.css';
+@import './global/tokens.css';
+@import './global/typography.css';
+@import './global/prose-figures.css';
+@import './global/fonts.css';
+@import './global/prose-code-anchors.css';
+@import './global/mermaid.css';
+@import './global/sidenotes.css';
+@import './global/toc-lens.css';
+@import './global/lightbox.css';
+@import './global/progress.css';
+@import './global/collapsibles.css';
+@import './global/motion.css';
+@import './global/admonitions.css';
+@import './global/directives.css';

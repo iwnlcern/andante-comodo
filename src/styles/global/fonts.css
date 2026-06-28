@@ -1,0 +1,46 @@
+/* Self-hosted, latin-subset variable fonts — no Google Fonts, no third-party request.
+   One file per style covers every weight (the wght axis). */
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'EB Garamond';
+  src: url('/fonts/EBGaramond-Variable.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'EB Garamond';
+  src: url('/fonts/EBGaramond-Italic-Variable.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Bodoni Std';
+  src: url('/fonts/BodoniStd-Roman.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Comic Mono for all code (inline + fenced) — matches the author's terminal */
+@font-face {
+  font-family: 'Comic Mono';
+  src: url('/fonts/ComicMono.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Comic Mono';
+  src: url('/fonts/ComicMono-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}

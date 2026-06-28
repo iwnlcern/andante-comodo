@@ -1,0 +1,13 @@
+---
+// Visible filter status/reset + always-present a11y live region. Render inside
+// a parent [data-tag-filter-scope] such as CollectionIndex's filterable wrapper.
+---
+
+<div class="tag-filter-status mb-4 text-sm text-text-secondary">
+  <span data-tag-filter-status hidden>
+    Filtering
+    <button type="button" class="ml-2 hover:text-accent" data-tag-filter-clear>clear</button>
+  </span>
+  <span class="font-mono" data-tag-filter-label aria-live="polite" role="status"></span>
+</div>
+<script>import '#scripts/tag-filter.ts';</script>

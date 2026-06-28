@@ -1,0 +1,50 @@
+---
+import EntryLayout from './EntryLayout.astro';
+import Tag from '#components/common/Tag.astro';
+import { taxonomyLabel } from '#lib/content/collection-registry.mjs';
+
+interface Props {
+  title: string;
+  type: 'til' | 'resource' | 'note';
+  date: Date;
+  tags: string[];
+  link?: string;
+}
+
+const { title, type, date, tags, link } = Astro.props;
+const typeLabel = taxonomyLabel('garden', type);
+
+const formattedDate = date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+
+---
+
+<EntryLayout title={title} description={`${typeLabel}: ${title}`} backHref="/garden" backLabel="Back to garden">
+  <div slot="meta">
+    <div class="flex items-center gap-2 mb-2">
+      <span class="text-xs text-text-secondary uppercase">{typeLabel}</span>
+      {link && (
+        <a
+          href={link}
+          class="text-xs text-text-secondary hover:text-text-secondary"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Visit link &nearr;
+        </a>
+      )}
+    </div>
+    <div class="flex flex-wrap items-center gap-3 text-sm text-text-secondary">
+      <time datetime={date.toISOString()}>{formattedDate}</time>
+      {tags.length > 0 && <span>·</span>}
+      {tags.map((tag) => (
+        <Tag tag={tag} href={`/tags/${tag}`} />
+      ))}
+    </div>
+  </div>
+  <slot />
+</EntryLayout>

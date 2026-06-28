@@ -1,0 +1,11 @@
+Demo Media Notice
+
+This template demo includes Gustav Mahler media so a fresh clone can build and show all media paths immediately.
+
+The demo recording at `public/audio/mahler-9-i-chicago-orchestra.mp3` is licensed CC BY-NC-ND 3.0. It is included whole and unmodified. Replace it before any commercial use or modified redistribution.
+
+The demo recording at `public/audio/mahler-2-i-dupage.mp3` is licensed CC BY-SA 3.0. Keep attribution and share-alike obligations if you retain it.
+
+The default demo recording at `public/audio/mahler-5-adagietto-peabody.mp3` is documented as CC0 / public-domain dedication.
+
+Detailed source and license notes are in `public/CREDITS.md`.

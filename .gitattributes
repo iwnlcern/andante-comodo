@@ -1,0 +1,15 @@
+# Normalize text line endings on checkin; check out platform-native.
+* text=auto eol=lf
+
+# Binary assets — never normalize or diff as text.
+*.woff2 binary
+*.woff  binary
+*.ttf   binary
+*.otf   binary
+*.mp3   binary
+*.pdf   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary

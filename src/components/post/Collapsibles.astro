@@ -1,0 +1,64 @@
+<script>
+  const initCollapsibles = () => {
+    window.__collapsiblesCleanup?.();
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const cleanups = [];
+
+    document.querySelectorAll('details.collapse-section').forEach((details) => {
+      const summary = details.querySelector('summary');
+      const content = details.querySelector('.collapse-content');
+      if (!summary || !content) return;
+      let animating = false;
+
+      const onClick = (event) => {
+        if (reduce) return;
+        event.preventDefault();
+        event.stopPropagation();
+        if (animating) return;
+        animating = true;
+
+        const settle = (after) => {
+          const te = (ev) => {
+            if (ev.propertyName !== 'max-height') return;
+            content.removeEventListener('transitionend', te);
+            content.style.maxHeight = '';
+            animating = false;
+            after?.();
+          };
+          content.addEventListener('transitionend', te);
+        };
+
+        if (details.open) {
+          content.style.maxHeight = `${content.scrollHeight}px`;
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            content.style.maxHeight = '0px';
+          }));
+          settle(() => {
+            details.open = false;
+          });
+        } else {
+          details.open = true;
+          content.style.maxHeight = '0px';
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            content.style.maxHeight = `${content.scrollHeight}px`;
+          }));
+          settle();
+        }
+      };
+
+      summary.addEventListener('click', onClick);
+      cleanups.push(() => summary.removeEventListener('click', onClick));
+    });
+
+    window.__collapsiblesCleanup = () => {
+      cleanups.forEach((fn) => fn());
+      delete window.__collapsiblesCleanup;
+    };
+  };
+
+  initCollapsibles();
+  if (!window.__collapsiblesBound) {
+    window.__collapsiblesBound = true;
+    document.addEventListener('astro:after-swap', initCollapsibles);
+  }
+</script>

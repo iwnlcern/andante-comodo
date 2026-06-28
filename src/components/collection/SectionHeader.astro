@@ -1,0 +1,17 @@
+---
+interface Props {
+  title: string;
+  href?: string;
+}
+
+const { title, href } = Astro.props;
+---
+
+<div class="flex items-center justify-between mb-6">
+  <h2 class="text-xl font-normal font-display text-text-primary">{title}</h2>
+  {href && (
+    <a href={href} class="text-sm text-text-secondary hl-link">
+      View all &rarr;
+    </a>
+  )}
+</div>

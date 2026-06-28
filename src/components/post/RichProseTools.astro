@@ -1,0 +1,13 @@
+---
+// Content-feature client runtimes shared by every content entry. All four are
+// scoped to `.post-prose ...` and no-op when their markup is absent.
+import MermaidRuntime from './MermaidRuntime.astro';
+import Lightbox from './Lightbox.astro';
+import Collapsibles from './Collapsibles.astro';
+import SortableTables from './SortableTables.astro';
+---
+
+<MermaidRuntime />
+<Lightbox />
+<Collapsibles />
+<SortableTables />

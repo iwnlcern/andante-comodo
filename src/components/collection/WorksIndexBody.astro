@@ -1,0 +1,57 @@
+---
+import { getCollection } from 'astro:content';
+import CollectionIndex from '#components/collection/CollectionIndex.astro';
+import { accentVar } from '#lib/content/collection-registry.mjs';
+import { workSortKey } from '#lib/content/collection-index';
+import type { IndexSection } from '#lib/content/collection-index';
+
+interface Props {
+  entry: {
+    label: string;
+    description?: string;
+    slug: string;
+    accent: string;
+  };
+}
+
+const { entry } = Astro.props;
+
+const allWorks = await getCollection('works');
+const works = allWorks.sort((a, b) => workSortKey(b.data.year) - workSortKey(a.data.year));
+
+const meta = (work: (typeof allWorks)[number]) =>
+  [work.data.duration, String(work.data.year)].filter(Boolean).join(' · ');
+
+const workAccent = accentVar(entry.accent);
+
+const toItem = (work: (typeof allWorks)[number]) => ({
+  title: work.data.title,
+  href: `${entry.slug}/${work.id}`,
+  description: work.data.description,
+  meta: meta(work),
+  accent: workAccent,
+  media: work.data.audio ? { audio: work.data.audio } : undefined,
+});
+
+const sections: IndexSection[] = [
+  {
+    label: 'Completed',
+    variant: 'cards',
+    scope: 'works',
+    items: works.filter((work) => work.data.status !== 'in-progress').map(toItem),
+  },
+  {
+    label: 'In Progress',
+    variant: 'cards',
+    scope: 'works',
+    items: works.filter((work) => work.data.status === 'in-progress').map(toItem),
+  },
+].filter((section) => section.items.length > 0);
+---
+
+<CollectionIndex
+  title={entry.label}
+  description={entry.description}
+  sections={sections}
+  emptyText="No compositions yet. Check back soon!"
+/>

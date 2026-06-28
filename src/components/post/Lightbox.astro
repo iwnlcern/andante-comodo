@@ -1,0 +1,216 @@
+<div class="lb" id="lb" aria-modal="true" role="dialog" aria-label="Image viewer">
+  <div class="count" id="lbCount"></div>
+  <img id="lbImg" alt="" />
+  <div class="lb-svg" id="lbSvg" aria-hidden="true"></div>
+  <div class="lb-meta">
+    <div class="cap" id="lbCap"></div>
+    <div class="lb-credit" id="lbCredit"></div>
+  </div>
+  <button class="close" id="lbClose" type="button" aria-label="Close">
+    <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+  </button>
+  <button class="prev" id="lbPrev" type="button" aria-label="Previous">
+    <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"></path></svg>
+  </button>
+  <button class="next" id="lbNext" type="button" aria-label="Next">
+    <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"></path></svg>
+  </button>
+</div>
+
+<script>
+  const initLightbox = () => {
+    window.__lightboxCleanup?.();
+
+    const lb = document.getElementById('lb');
+    const lbImg = document.getElementById('lbImg');
+    const lbSvg = document.getElementById('lbSvg');
+    const lbCap = document.getElementById('lbCap');
+    const lbCredit = document.getElementById('lbCredit');
+    const lbCount = document.getElementById('lbCount');
+    const closeBtn = document.getElementById('lbClose');
+    const prevBtn = document.getElementById('lbPrev');
+    const nextBtn = document.getElementById('lbNext');
+
+    const buildItems = () =>
+      [
+        ...document.querySelectorAll(
+          '.post-prose figure.post-figure img, .post-prose .mermaid[data-processed]:not([data-mermaid-error])',
+        ),
+      ].filter((el) => el.tagName === 'IMG' || el.querySelector('svg'));
+
+    let items = buildItems();
+    let idx = 0;
+    let trigger = null;
+    let touchX = 0;
+    let itemHandlers = [];
+    const controls = [closeBtn, prevBtn, nextBtn];
+
+    const attachItemHandlers = () => {
+      itemHandlers = items.map((item, i) => {
+        const handler = () => openLb(i);
+        item.addEventListener('click', handler);
+        return [item, handler];
+      });
+    };
+    const detachItemHandlers = () => {
+      for (const [item, handler] of itemHandlers) item.removeEventListener('click', handler);
+      itemHandlers = [];
+    };
+
+    const show = (i) => {
+      if (!items.length) return;
+      idx = (i + items.length) % items.length;
+      const el = items[idx];
+      if (el.tagName === 'IMG') {
+        lbImg.src = el.currentSrc || el.src;
+        lbImg.alt = el.alt || '';
+        lbImg.style.display = '';
+        lbSvg.style.display = 'none';
+        lbSvg.replaceChildren();
+        const fig = el.closest('figure');
+        const cap = fig?.querySelector('figcaption');
+        // Strip the trailing # heading anchor that rehypeHeadingAnchors appends.
+        lbCap.textContent = cap ? cap.textContent.replace(/#$/, '').trim() : '';
+        lbCredit.textContent = '';
+        const ref = fig?.dataset.creditRef;
+        if (ref) {
+          const li = document.getElementById(ref);
+          if (li) {
+            const strong = li.querySelector('strong');
+            const nameLen = strong ? strong.textContent.length : 0;
+            lbCredit.textContent = li.textContent.slice(nameLen).replace(/^[\s-]+/, '').trim();
+          }
+        }
+      } else {
+        lbImg.style.display = 'none';
+        lbSvg.style.display = '';
+        const svg = el.querySelector('svg');
+        if (svg) {
+          const clone = svg.cloneNode(true);
+          clone.removeAttribute('style');
+          const vb = clone.viewBox && clone.viewBox.baseVal;
+          const aspect = vb && vb.width && vb.height ? vb.width / vb.height : 1.6;
+          const maxW = window.innerWidth * 0.92 - 48;
+          const maxH = window.innerHeight * 0.88 - 48;
+          let w = maxW;
+          let h = w / aspect;
+          if (h > maxH) {
+            h = maxH;
+            w = h * aspect;
+          }
+          clone.setAttribute('width', Math.round(w));
+          clone.setAttribute('height', Math.round(h));
+          clone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+          lbSvg.replaceChildren(clone);
+        } else {
+          lbSvg.replaceChildren();
+        }
+        lbCap.textContent = '';
+        lbCredit.textContent = '';
+      }
+      lbCount.textContent = `${idx + 1} / ${items.length}`;
+    };
+
+    const openLb = (i) => {
+      trigger = items[i];
+      show(i);
+      lb.classList.add('open');
+      window.addEventListener('keydown', onKeydown);
+      closeBtn.focus();
+    };
+
+    const closeLb = () => {
+      lb.classList.remove('open');
+      window.removeEventListener('keydown', onKeydown);
+      if (trigger) {
+        const t = trigger;
+        const prevTabIndex = t.getAttribute('tabindex');
+        t.setAttribute('tabindex', '-1');
+        t.focus();
+        // Keep focus on the trigger after close, then remove the temporary
+        // tabindex once focus leaves so source DOM is not permanently mutated.
+        t.addEventListener(
+          'blur',
+          function restoreTabIndex() {
+            t.removeEventListener('blur', restoreTabIndex);
+            if (prevTabIndex === null) t.removeAttribute('tabindex');
+            else t.setAttribute('tabindex', prevTabIndex);
+          },
+          { once: true },
+        );
+      }
+    };
+
+    const rebuild = () => {
+      const active = lb.classList.contains('open') ? items[idx] : null;
+      detachItemHandlers();
+      items = buildItems();
+      attachItemHandlers();
+      if (active) {
+        const next = items.indexOf(active);
+        idx = next >= 0 ? next : Math.min(idx, Math.max(0, items.length - 1));
+        if (items.length) lbCount.textContent = `${idx + 1} / ${items.length}`;
+      }
+    };
+
+    const onKeydown = (event) => {
+      if (!lb.classList.contains('open')) return;
+      if (event.key === 'Escape') closeLb();
+      else if (event.key === 'ArrowRight') show(idx + 1);
+      else if (event.key === 'ArrowLeft') show(idx - 1);
+      else if (event.key === 'Tab') {
+        const current = document.activeElement;
+        const index = controls.indexOf(current);
+        if (event.shiftKey && index <= 0) {
+          event.preventDefault();
+          controls.at(-1).focus();
+        } else if (!event.shiftKey && index === controls.length - 1) {
+          event.preventDefault();
+          controls[0].focus();
+        }
+      }
+    };
+    const onBackdrop = (event) => {
+      if (event.target === lb) closeLb();
+    };
+    const onPrev = () => show(idx - 1);
+    const onNext = () => show(idx + 1);
+    const onTouchStart = (event) => {
+      touchX = event.touches[0].clientX;
+    };
+    const onTouchEnd = (event) => {
+      const dx = event.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 40) show(idx + (dx < 0 ? 1 : -1));
+    };
+    const onMermaidRendered = () => rebuild();
+
+    attachItemHandlers();
+    closeBtn.addEventListener('click', closeLb);
+    prevBtn.addEventListener('click', onPrev);
+    nextBtn.addEventListener('click', onNext);
+    lb.addEventListener('click', onBackdrop);
+    lb.addEventListener('touchstart', onTouchStart, { passive: true });
+    lb.addEventListener('touchend', onTouchEnd);
+    document.addEventListener('mermaid:rendered', onMermaidRendered);
+
+    window.__lightboxCleanup = () => {
+      detachItemHandlers();
+      closeBtn.removeEventListener('click', closeLb);
+      prevBtn.removeEventListener('click', onPrev);
+      nextBtn.removeEventListener('click', onNext);
+      lb.removeEventListener('click', onBackdrop);
+      lb.removeEventListener('touchstart', onTouchStart);
+      lb.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('keydown', onKeydown);
+      document.removeEventListener('mermaid:rendered', onMermaidRendered);
+      lb.classList.remove('open');
+      window.__lightboxCleanup = undefined;
+    };
+  };
+
+  initLightbox();
+  if (!window.__lightboxBound) {
+    window.__lightboxBound = true;
+    document.addEventListener('astro:after-swap', initLightbox);
+  }
+</script>

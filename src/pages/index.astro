@@ -1,0 +1,194 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '#layouts/BaseLayout.astro';
+import SectionHeader from '#components/collection/SectionHeader.astro';
+import CollectionRow from '#components/collection/CollectionRow.astro';
+import Card from '#components/collection/Card.astro';
+import { blogItem, bookItem, byRating, requiredCollection } from '#lib/content/collection-items';
+import { recent, recentWorks } from '#lib/content/collection-index';
+import { accentVar, homeCollections } from '#lib/content/collection-registry.mjs';
+import { site } from '#config/site.mjs';
+import { obfuscateEmail } from '#lib/contact-obfuscation.mjs';
+
+const homeEntries = homeCollections();
+const contactEmail = obfuscateEmail(site.email); // obfuscated in static HTML; a client script reassembles the mailto:
+const limitFor = (entry) => entry.home.limit ?? Number.POSITIVE_INFINITY;
+
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const allProjects = await getCollection('projects');
+const allGarden = await getCollection('garden');
+const allReading = await getCollection('reading');
+
+const allWorks = await getCollection('works');
+
+const projectAccent = accentVar(requiredCollection('projects').accent);
+const workAccent = accentVar(requiredCollection('works').accent);
+---
+
+<BaseLayout title={site.name} description={site.meta.description}>
+  <section class="mb-10 grid gap-8 md:grid-cols-[minmax(0,1fr)_16rem] md:items-start lg:grid-cols-[minmax(0,1fr)_17rem]">
+    <div>
+      <p class="mb-4 text-xs uppercase tracking-[0.32em] text-text-secondary">
+        {site.hero.eyebrow}
+      </p>
+      <h1 class="mb-5 max-w-3xl hero-title font-display text-text-primary">
+        {site.hero.headline}
+      </h1>
+      <p class="max-w-2xl text-base leading-8 text-text-secondary md:text-lg">
+        {site.hero.bio}
+        <a href={site.hero.bioLink.href} class="hl-link">{site.hero.bioLink.label} &rarr;</a>
+      </p>
+      <div class="mt-6 flex flex-wrap gap-3">
+        {site.hero.ctas.map((cta, index) => (
+          <a
+            href={cta.href}
+            class={index === 0
+              ? 'inline-flex items-center rounded-md bg-accent px-4 py-2 text-sm font-medium text-white transition hover:opacity-90'
+              : 'inline-flex items-center rounded-md border border-border px-4 py-2 text-sm font-medium text-text-primary transition hover:border-text-secondary'}
+          >
+            {cta.label}
+          </a>
+        ))}
+      </div>
+      <div class="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-border pt-6 text-sm">
+        <a href={site.social.github} target="_blank" rel="noopener noreferrer" class="text-text-secondary transition-colors hover:text-text-primary">GitHub</a>
+        <a href={site.social.linkedin} target="_blank" rel="noopener noreferrer" class="text-text-secondary transition-colors hover:text-text-primary">LinkedIn</a>
+        <a href="#" data-contact-email class="text-text-secondary transition-colors hover:text-text-primary">{contactEmail}</a>
+        <a href={site.social.rss} class="text-text-secondary transition-colors hover:text-text-primary">RSS</a>
+      </div>
+    </div>
+
+    <figure class="mx-auto w-full max-w-[27rem] sm:max-w-[30.5rem] md:ml-auto md:max-w-none">
+      <div class="relative">
+        <div class="relative rounded-full border border-border bg-surface p-2">
+          <div class="aspect-square overflow-hidden rounded-full bg-background/80 flex items-center justify-center">
+            <img
+              src={site.hero.portrait.src}
+              alt={site.hero.portrait.alt}
+              class="h-[112%] w-auto max-w-none"
+              loading="eager"
+            />
+          </div>
+        </div>
+      </div>
+      <figcaption class="mt-4 text-center text-sm text-text-secondary">
+        {site.hero.portrait.credit}
+      </figcaption>
+    </figure>
+  </section>
+
+  {homeEntries.map((entry) => {
+    if (entry.id === 'blog') {
+      const recentPosts = recent(allPosts, limitFor(entry));
+      return recentPosts.length > 0 && (
+        <section class="mb-10">
+          <SectionHeader title={entry.label} href={entry.slug} />
+          <ul class="space-y-1">
+            {recentPosts.map((post) => (
+              <CollectionRow {...blogItem(post)} />
+            ))}
+          </ul>
+        </section>
+      );
+    }
+
+    if (entry.id === 'garden') {
+      const recentGarden = recent(allGarden, limitFor(entry));
+      return recentGarden.length > 0 && (
+        <section class="mb-10">
+          <SectionHeader title={entry.label} href={entry.slug} />
+          <ul class="space-y-1">
+            {recentGarden.map((note) => (
+              <CollectionRow
+                title={note.data.title}
+                href={note.data.type === 'resource' && note.data.link ? note.data.link : `${entry.slug}/${note.id}`}
+                external={note.data.type === 'resource' && Boolean(note.data.link)}
+                date={note.data.date}
+                tags={note.data.tags}
+              />
+            ))}
+          </ul>
+        </section>
+      );
+    }
+
+    if (entry.id === 'projects') {
+      const recentProjects = recent(allProjects, limitFor(entry));
+      return recentProjects.length > 0 && (
+        <section class="mb-10">
+          <SectionHeader title={entry.label} href={entry.slug} />
+          <div class="grid gap-4 sm:grid-cols-2">
+            {/*
+              Keep project cards inline: projectItem emits date, and Card renders date when present.
+              Spreading projectItem here would change the current home-page output.
+            */}
+            {recentProjects.map((project) => (
+              <Card
+                title={project.data.title}
+                description={project.data.description}
+                href={`${entry.slug}/${project.id}`}
+                tags={project.data.tags}
+                accent={projectAccent}
+              />
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    if (entry.id === 'works') {
+      const latestWorks = recentWorks(
+        allWorks.filter((work) => work.data.status !== 'in-progress'),
+        limitFor(entry),
+      );
+      return latestWorks.length > 0 && (
+        <section class="mb-10">
+          <SectionHeader title={entry.label} href={entry.slug} />
+          <div class="grid gap-4 sm:grid-cols-2">
+            {latestWorks.map((work) => (
+              <Card
+                title={work.data.title}
+                description={work.data.description}
+                href={`${entry.slug}/${work.id}`}
+                meta={[work.data.duration, String(work.data.year)].filter(Boolean).join(' · ')}
+                accent={workAccent}
+                media={work.data.audio ? { audio: work.data.audio } : undefined}
+              />
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    if (entry.id === 'reading') {
+      const currentlyReading = allReading
+        .filter((item) => item.data.type === 'book' && item.data.status === 'reading')
+        .sort(byRating)
+        .slice(0, limitFor(entry));
+      return currentlyReading.length > 0 && (
+        <section class="mb-10">
+          <SectionHeader title={entry.label} href={entry.slug} />
+          <ul class="space-y-1">
+            {currentlyReading.map((book) => (
+              <CollectionRow {...bookItem(book)} />
+            ))}
+          </ul>
+        </section>
+      );
+    }
+
+    return null;
+  })}
+
+</BaseLayout>
+
+<script>
+  // Reassemble the contact mailto at runtime so the raw address never ships in
+  // static HTML/JS (anti-scraping; keeps the test:site-build guard green). No-JS
+  // visitors still see the readable obfuscated address.
+  for (const el of document.querySelectorAll('[data-contact-email]')) {
+    const email = el.textContent.trim().split(' [at] ').join('@').split(' [dot] ').join('.');
+    el.setAttribute('href', `mailto:${email}`);
+    el.textContent = 'Email';
+  }
+</script>

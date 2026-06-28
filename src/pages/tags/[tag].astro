@@ -1,0 +1,101 @@
+---
+import { getCollection } from 'astro:content';
+import CollectionIndex from '#components/collection/CollectionIndex.astro';
+import {
+  blogItem,
+  projectItem,
+  bookItem,
+  articleItem,
+  byDate,
+  byRating,
+  dropEmptySections,
+  requiredCollection,
+} from '#lib/content/collection-items';
+import { enabledCollections } from '#lib/content/collection-registry.mjs';
+import type { IndexSection } from '#lib/content/collection-index';
+
+export async function getStaticPaths() {
+  // Aggregates blog/projects/garden/reading. `works` is intentionally omitted: no tags in schema.
+  const enabledIds = new Set(enabledCollections().map((collection) => collection.id));
+  const [allBlog, allProjects, allGarden, allReading] = await Promise.all([
+    getCollection('blog', ({ data }) => !data.draft),
+    getCollection('projects'),
+    getCollection('garden'),
+    getCollection('reading'),
+  ]);
+  const blog = enabledIds.has('blog') ? allBlog : [];
+  const projects = enabledIds.has('projects') ? allProjects : [];
+  const garden = enabledIds.has('garden') ? allGarden : [];
+  const reading = enabledIds.has('reading') ? allReading : [];
+
+  const allTags = new Set<string>();
+
+  blog.forEach((post) => post.data.tags.forEach((tag) => allTags.add(tag)));
+  projects.forEach((project) => project.data.tags.forEach((tag) => allTags.add(tag)));
+  garden.forEach((note) => note.data.tags.forEach((tag) => allTags.add(tag)));
+  reading.forEach((entry) => entry.data.tags.forEach((tag) => allTags.add(tag)));
+
+  return Array.from(allTags).map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      posts: blog.filter((post) => post.data.tags.includes(tag)),
+      projectItems: projects.filter((project) => project.data.tags.includes(tag)),
+      notes: garden.filter((note) => note.data.tags.includes(tag)),
+      readingBooks: reading.filter((entry) => entry.data.type === 'book' && entry.data.tags.includes(tag)),
+      readingArticles: reading.filter(
+        (entry) => entry.data.type === 'article' && entry.data.tags.includes(tag)
+      ),
+    },
+  }));
+}
+
+const { tag, posts, projectItems, notes, readingBooks, readingArticles } = Astro.props;
+const total =
+  posts.length + projectItems.length + notes.length + readingBooks.length + readingArticles.length;
+const garden = requiredCollection('garden');
+
+const sections: IndexSection[] = dropEmptySections([
+  {
+    label: 'Blog Posts',
+    variant: 'rows',
+    scope: 'tag-blog',
+    items: [...posts].sort(byDate).map(blogItem),
+  },
+  {
+    label: 'Projects',
+    variant: 'cards',
+    scope: 'tag-projects',
+    items: [...projectItems].sort(byDate).map(projectItem),
+  },
+  {
+    label: 'Garden',
+    variant: 'rows',
+    scope: 'tag-garden',
+    items: [...notes].sort(byDate).map((note) => ({
+      title: note.data.title,
+      href: `${garden.slug}/${note.id}`,
+      date: note.data.date,
+      tags: note.data.tags,
+    })),
+  },
+  {
+    label: 'Reading (Books)',
+    variant: 'rows',
+    scope: 'tag-books',
+    items: [...readingBooks].sort(byRating).map(bookItem),
+  },
+  {
+    label: 'Reading (Articles)',
+    variant: 'rows',
+    scope: 'tag-articles',
+    items: [...readingArticles].sort(byDate).map(articleItem),
+  },
+]);
+---
+
+<CollectionIndex
+  title={`#${tag}`}
+  description={`${total} item${total !== 1 ? 's' : ''} tagged "${tag}"`}
+  sections={sections}
+/>

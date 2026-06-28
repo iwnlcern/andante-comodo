@@ -1,0 +1,65 @@
+---
+import BaseLayout from '#layouts/BaseLayout.astro';
+import CollectionRow from './CollectionRow.astro';
+import Card from './Card.astro';
+import type { CollectionIndexProps } from '#lib/content/collection-index';
+
+type Props = CollectionIndexProps;
+const {
+  title,
+  description,
+  sections,
+  emptyText = 'Nothing here yet. Check back soon!',
+  filterable = false,
+  filterScope,
+} = Astro.props;
+const visible = sections.filter((section) => section.items.length > 0);
+---
+
+<BaseLayout title={title} description={description ?? title}>
+  <h1 class="mb-2 text-3xl font-normal font-display">{title}</h1>
+  {description ? (
+    <p class="mb-8 text-lg text-text-secondary">{description}</p>
+  ) : (
+    <div class="mb-8"></div>
+  )}
+
+  {visible.length === 0 ? (
+    <p class="text-base text-text-secondary">{emptyText}</p>
+  ) : (
+    <div class="space-y-12" data-tag-filter-scope={filterable && filterScope ? filterScope : undefined}>
+      {filterable && <slot name="controls" />}
+      {visible.map((section) => (
+        <section data-tag-filter-scope={section.scope || undefined}>
+          {section.label && (
+            <h2 class="mb-4 text-lg font-semibold uppercase tracking-wide text-text-secondary">
+              {section.label}
+            </h2>
+          )}
+          {section.variant === 'cards' ? (
+            <div class="grid gap-4 sm:grid-cols-2">
+              {section.items.map((item) => (
+                <Card
+                  title={item.title}
+                  description={item.description}
+                  href={item.href}
+                  date={item.date}
+                  tags={item.tags}
+                  accent={item.accent}
+                  meta={item.meta}
+                  media={item.media}
+                />
+              ))}
+            </div>
+          ) : (
+            <ul class="space-y-1">
+              {section.items.map((item) => <CollectionRow {...item} />)}
+            </ul>
+          )}
+        </section>
+      ))}
+    </div>
+  )}
+
+  <slot />
+</BaseLayout>

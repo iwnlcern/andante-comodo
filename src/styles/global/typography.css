@@ -1,0 +1,105 @@
+/* Content links and card/box titles light up accent-blue when the link — or the card holding
+   it — is hovered. Unlayered so it beats Tailwind's resting color utilities. */
+.hl-link {
+  transition: color 0.15s ease;
+}
+.group:hover .hl-link,
+.hl-link:hover,
+.hl-link:focus-visible {
+  color: rgb(var(--color-accent));
+}
+
+.post-prose { scroll-behavior: smooth; }
+
+.prose {
+  /* Source order intentionally lets the reading measure beat Tailwind max-w-none utilities. */
+  max-width: var(--measure);
+  margin-inline: auto;
+  font-family: var(--font-serif);
+  /* Prose body size; the --prose-size knob lives in tokens.css. Headings below are `em`
+     ratios of it, so the whole prose hierarchy scales from that one var. */
+  font-size: var(--prose-size);
+  line-height: var(--lh);
+  font-feature-settings: "kern", "liga", "calt";
+}
+
+/* --- Flow spacing (lobotomized-owl): single-direction margin-top, so vertical gaps never
+   collapse and each relationship is an independent dial — the previous sibling never sets a
+   bottom gap; the next sibling's top margin owns the space. Block components that bring their
+   own margins (figures, admonitions, collapsibles — unlayered, imported after this file) keep
+   theirs; this governs paragraphs, lists, tables, blockquotes, and headings.
+   Three independent knobs (all in --rhythm units, ~1.7em): */
+.prose > * { margin-block: 0; }
+.prose > * + * { margin-top: calc(var(--rhythm) * var(--flow-gap)); }                    /* default gap between blocks */
+.prose > * + :is(h2, h3) { margin-top: calc(var(--rhythm) * var(--flow-above-heading)); } /* gap ABOVE a heading */
+.prose > :is(h2, h3) + * { margin-top: calc(var(--rhythm) * var(--flow-below-heading)); } /* gap BELOW a heading */
+
+.prose :is(h1, h2, h3) {
+  font-family: var(--font-display);
+  letter-spacing: 0.005em;
+}
+
+/* Heading sizes are `em` ratios of the prose body size (--prose-size), so the whole
+   hierarchy scales together. Ratios preserve the previous look at the 1.25rem body size:
+   h2 1.48x (was 1.85rem), h3 1.12x (was 1.4rem). h1 keeps its fluid clamp but its
+   min/max bounds are now em, so they scale with the body too (the 5.5vw middle stays viewport-fluid). */
+.prose h1 {
+  font-size: clamp(1.92em, 5.5vw, 2.88em);
+  line-height: 1.04;
+  font-weight: 400;
+}
+
+.prose h2 {
+  font-size: 1.48em;
+  font-weight: 400;
+}
+
+.prose h3 {
+  font-size: 1.12em;
+  font-weight: 400;
+}
+
+.entry-title {
+  font-family: var(--font-display);
+  /* em-ratios of the prose body knob (entry-title sits outside .prose, so calc(--prose-size)
+     not bare em). At default --prose-size 1.375rem this is the prior clamp. */
+  font-size: clamp(calc(var(--prose-size) * 1.745), 5.5vw, calc(var(--prose-size) * 2.618));
+  line-height: 1.04;
+  font-weight: 400;
+  letter-spacing: 0.005em;
+}
+
+/* Home hero. Ratios of --ui-base, matching the prior inline clamp on index.astro. */
+.hero-title {
+  font-size: clamp(calc(var(--ui-base) * 1.055), 3.4vw, calc(var(--ui-base) * 1.974));
+  line-height: 1.12;
+  font-weight: 400;
+}
+
+/* 404 code. On the --ui-base scale, matching the prior off-scale text-6xl. */
+.error-code {
+  font-size: calc(var(--ui-base) * 2.82);
+  font-weight: 700;
+}
+
+/* The résumé keeps the compact default type scale (the global text-* scale is enlarged for the
+   rest of the site). Unlayered + scoped, so these beat Tailwind's layered utilities. */
+.resume-base .text-xs { font-size: 0.75rem; line-height: 1rem; }
+.resume-base .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+.resume-base .text-base { font-size: 1rem; line-height: 1.5rem; }
+.resume-base .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+.resume-base .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+.resume-base .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+.resume-base .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+.resume-base .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+
+html.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html.no-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}

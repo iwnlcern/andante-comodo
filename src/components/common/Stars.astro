@@ -1,0 +1,100 @@
+---
+const { value } = Astro.props as { value: number };
+
+const EXTRAORDINARY_RATING = 6;
+const isExtraordinary = value === EXTRAORDINARY_RATING;
+const displayValue = Math.min(value, 5);
+const baseColor = isExtraordinary ? 'rgb(245, 197, 66)' : '#4b5563';
+const fillColor = isExtraordinary ? 'rgb(245, 197, 66)' : '#3b82f6';
+const stars = Array.from({ length: 5 }, (_, index) => {
+  const fill = Math.max(0, Math.min(1, displayValue - index));
+  return { fill, index };
+});
+---
+
+<span
+  class={`stars ${isExtraordinary ? 'stars--extraordinary' : ''}`}
+  aria-label={isExtraordinary ? '6 out of 5' : `${value} out of 5`}
+>
+  <span class="stars__row" aria-hidden="true">
+    {stars.map(({ fill, index }) => (
+      <span class="star" style={`--star-fill: ${fill * 100}%`} data-index={index}>
+        <svg class="star__base" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+          <path fill={baseColor} d="M12 17.3 18.2 21l-1.7-7.1L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21z"></path>
+        </svg>
+        <span class="star__fill">
+          <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+            <path fill={fillColor} d="M12 17.3 18.2 21l-1.7-7.1L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21z"></path>
+          </svg>
+        </span>
+      </span>
+    ))}
+    {isExtraordinary && (
+      <span class="star star--extra" style="--star-fill: 100%" aria-hidden="true">
+        <svg class="star__base" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+          <path fill={baseColor} d="M12 17.3 18.2 21l-1.7-7.1L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21z"></path>
+        </svg>
+        <span class="star__fill">
+          <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+            <path fill={fillColor} d="M12 17.3 18.2 21l-1.7-7.1L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21z"></path>
+          </svg>
+        </span>
+      </span>
+    )}
+  </span>
+
+  {isExtraordinary && <span class="badge">6/5</span>}
+</span>
+
+<style>
+  .stars {
+    --star-size: 1.05rem;
+    --star-gap: 0.15rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+  }
+
+  .stars__row {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--star-gap);
+  }
+
+  .star {
+    position: relative;
+    width: var(--star-size);
+    height: var(--star-size);
+    display: inline-block;
+    --star-fill: 0%;
+  }
+
+  .star svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .star__fill {
+    position: absolute;
+    inset: 0;
+    clip-path: inset(0 calc(100% - var(--star-fill)) 0 0);
+    -webkit-clip-path: inset(0 calc(100% - var(--star-fill)) 0 0);
+  }
+
+  .stars--extraordinary .stars__row,
+  .stars--extraordinary .star--extra {
+    filter:
+      drop-shadow(0 0 6px rgba(245, 197, 66, .55))
+      drop-shadow(0 0 14px rgba(245, 197, 66, .35));
+  }
+
+  .badge {
+    font-size: .75rem;
+    line-height: 1;
+    padding: .15rem .35rem;
+    border-radius: .4rem;
+    border: 1px solid rgba(245, 197, 66, .6);
+    color: rgb(245, 197, 66);
+  }
+</style>

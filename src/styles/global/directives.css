@@ -1,0 +1,65 @@
+/* Author-controlled layout directives (see src/lib/markdown/directives.mjs):
+   float images, multi-column lists, sortable tables, universal row hover. */
+
+/* --- Float / wraparound images --- */
+.post-prose .post-figure.float-left,
+.post-prose .post-figure.float-right {
+  width: var(--float-width, 45%);
+  max-width: 100%;
+}
+.post-prose .post-figure.float-left {
+  float: left;
+  margin: 0.3rem 1.5rem 1rem 0;
+}
+.post-prose .post-figure.float-right {
+  float: right;
+  margin: 0.3rem 0 1rem 1.5rem;
+}
+/* 640 = BREAKPOINTS.mobile / Tailwind sm. */
+@media (max-width: 640px) {
+  .post-prose .post-figure.float-left,
+  .post-prose .post-figure.float-right {
+    float: none;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* --- Multi-column bullet lists --- */
+.post-prose ul.multicol {
+  columns: var(--cols, 2);
+  column-gap: 2.5rem;
+}
+.post-prose ul.multicol > li {
+  break-inside: avoid;
+}
+/* 640 = BREAKPOINTS.mobile / Tailwind sm. */
+@media (max-width: 640px) {
+  .post-prose ul.multicol {
+    columns: 1;
+  }
+}
+
+/* --- Universal table-row hover (all prose tables, marker or not) --- */
+.post-prose table tbody tr:hover {
+  background: rgb(0 0 0 / 0.04);
+}
+:root[data-theme='dark'] .post-prose table tbody tr:hover {
+  background: rgb(255 255 255 / 0.05);
+}
+
+/* --- Sortable table affordances --- */
+.post-prose table.sortable th {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.post-prose table.sortable th[aria-sort='ascending']::after {
+  content: ' \25B2';
+  font-size: 0.7em;
+}
+.post-prose table.sortable th[aria-sort='descending']::after {
+  content: ' \25BC';
+  font-size: 0.7em;
+}

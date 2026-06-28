@@ -1,0 +1,36 @@
+---
+interface Props {
+  title: string;
+  subtitle?: string;
+  link?: { href: string; label: string };
+  location?: string;
+  dates?: string;
+  gpa?: string;
+  bullets?: Array<string | { label: string; text: string }>;
+}
+const { title, subtitle, link, location, dates, gpa, bullets = [] } = Astro.props;
+---
+
+<div>
+  <div class="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+    <div>
+      <h3 class="font-semibold font-dense">{title}</h3>
+      {subtitle && <p class="text-text-secondary">{subtitle}</p>}
+      {link && <a href={link.href} class="text-sm text-accent ext-link">{link.label}</a>}
+    </div>
+    <div class="text-sm text-text-secondary sm:text-right">
+      {location && <div>{location}</div>}
+      {dates && <div>{dates}</div>}
+      {gpa && <div>{gpa}</div>}
+    </div>
+  </div>
+  {bullets.length > 0 && (
+    <ul class="list-disc pl-5 text-sm text-text-secondary space-y-1 mt-2">
+      {bullets.map((bl) => (
+        <li>
+          {typeof bl === 'string' ? bl : (<><span class="font-semibold text-text-primary">{bl.label}</span> {bl.text}</>)}
+        </li>
+      ))}
+    </ul>
+  )}
+</div>

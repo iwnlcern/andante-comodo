@@ -1,0 +1,77 @@
+---
+import Tag from '#components/common/Tag.astro';
+import Stars from '#components/common/Stars.astro';
+import type { IndexItem } from '#lib/content/collection-index';
+
+type Props = IndexItem;
+const {
+  title,
+  href,
+  external = false,
+  date,
+  description,
+  tags = [],
+  accent,
+  meta,
+  rating,
+  highlight = false,
+  media,
+} = Astro.props;
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+
+const filterTags = tags.map((tag) => tag.toLowerCase()).join(',');
+const rowStyle = accent ? `--row-accent: ${accent};` : undefined;
+---
+
+<li
+  class:list={['collection-row flex items-start gap-4 py-2', highlight && 'is-highlight']}
+  style={rowStyle}
+  data-collection-item
+  data-filter-tags={filterTags || undefined}
+>
+  {date && (
+    <time class="w-20 shrink-0 pt-1 text-xs text-text-secondary" datetime={date.toISOString()}>
+      {fmt(date)}
+    </time>
+  )}
+  <div class="min-w-0 flex-1">
+    <div class="flex flex-wrap items-center gap-2">
+      <a
+        href={href}
+        target={external ? '_blank' : undefined}
+        rel={external ? 'noopener noreferrer' : undefined}
+        class="text-lg font-medium text-text-primary hl-link focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 rounded-sm"
+      >
+        {title}
+        {external && <span class="sr-only"> (external link)</span>}
+      </a>
+      {external && <span class="text-xs text-text-secondary" aria-hidden="true">&nearr;</span>}
+      {rating != null && <Stars value={rating} />}
+    </div>
+    {meta && <p class="mt-0.5 text-sm text-text-secondary">{meta}</p>}
+    {description && <p class="mt-0.5 line-clamp-1 text-sm text-text-secondary">{description}</p>}
+    {media?.audio && (
+      <audio
+        src={media.audio}
+        class="mt-2 h-8 w-full max-w-sm"
+        controls
+        preload="none"
+        aria-label={`Listen to ${title}`}
+      />
+    )}
+    {tags.length > 0 && (
+      <div class="mt-1.5 flex flex-wrap gap-2">
+        {tags.slice(0, 3).map((tag) => <Tag tag={tag} href={`/tags/${tag}`} />)}
+      </div>
+    )}
+  </div>
+</li>
+
+<style>
+  .collection-row.is-highlight {
+    border-left: 2px solid var(--row-accent, rgb(245, 197, 66));
+    padding-left: 0.75rem;
+  }
+</style>

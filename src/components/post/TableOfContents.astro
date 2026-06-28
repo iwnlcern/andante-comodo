@@ -1,0 +1,32 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+  variant: 'mobile';
+}
+
+const { headings, variant } = Astro.props;
+const items = headings.filter((heading) => heading.depth === 2 && heading.slug !== 'footnote-label');
+---
+
+{
+  items.length > 0 && variant === 'mobile' && (
+    <details class="post-toc mb-10 rounded-lg border border-border bg-surface-muted/40 px-4 py-3 xl:hidden">
+      <summary class="cursor-pointer text-sm font-medium text-text-secondary">Contents</summary>
+      <ul class="mt-3 space-y-2">
+        {items.map((heading) => (
+          <li>
+            <a href={`#${heading.slug}`} class="text-sm text-text-secondary hover:text-text-primary">
+              {heading.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </details>
+  )
+}

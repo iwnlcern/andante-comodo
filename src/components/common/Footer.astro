@@ -1,0 +1,39 @@
+---
+import NewsletterSignup from '#components/newsletter/NewsletterSignup.astro';
+import { site } from '#config/site.mjs';
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="w-full border-t border-border mt-auto">
+  <div class="max-w-5xl mx-auto px-6 py-8">
+    <div class="mb-6">
+      <NewsletterSignup variant="footer" />
+    </div>
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-text-secondary text-sm">
+        &copy; {currentYear} {site.name}. All rights reserved.
+      </p>
+      <div class="flex items-center gap-4">
+        <a href={site.social.rss} class="text-text-secondary hover:text-text-primary text-sm">
+          RSS
+        </a>
+        <a
+          href={site.social.github}
+          class="text-text-secondary hover:text-text-primary text-sm"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub
+        </a>
+        <a
+          href={site.social.linkedin}
+          class="text-text-secondary hover:text-text-primary text-sm"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          LinkedIn
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>

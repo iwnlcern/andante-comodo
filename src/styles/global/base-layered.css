@@ -1,0 +1,151 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* ── PALETTE — EDIT HERE ──────────────────────────────────────────────
+     Theme colors as space-separated RGB channels, consumed via
+     rgb(var(--color-…) / <alpha-value>) in tailwind.config.mjs. Dark is the
+     :root default; the [data-theme='light'] block below mirrors EVERY token —
+     edit both. Full guide: docs/theming.md · type/layout knobs: tokens.css
+     ──────────────────────────────────────────────────────────────────── */
+  :root {
+    --color-background: 19 15 10;
+    --color-surface: 29 24 18;
+    --color-surface-muted: 38 32 24;
+    --color-surface-contrast: 22 18 12;
+    --color-border: 44 38 29;
+    --color-text-primary: 248 247 244;
+    --color-text-secondary: 165 161 154;
+    --color-accent: 59 130 246;
+    --accent-technical: 90 158 152;
+    --accent-slice-of-life: 195 154 58;
+    --accent-rants: 164 127 176;
+    --accent-project: 125 154 106;
+    --accent-work: 135 141 192;
+    --adm-tip: 74 170 110;
+    --adm-caution: 199 154 64;
+    --adm-danger: 212 96 84;
+    --theme-outline-width: 1px;
+    --theme-divider-width: 1px;
+    --audio-control-filter: invert(1);
+    color-scheme: dark;
+  }
+
+  :root[data-theme='light'] {
+    --color-background: 241 236 224;
+    --color-surface: 248 244 233;
+    --color-surface-muted: 232 226 210;
+    --color-surface-contrast: 223 216 198;
+    --color-border: 210 201 182;
+    --color-text-primary: 26 24 20;
+    --color-text-secondary: 92 86 74;
+    --color-accent: 37 99 235;
+    --accent-technical: 47 99 94;
+    --accent-slice-of-life: 125 96 22;
+    --accent-rants: 126 90 140;
+    --accent-project: 74 97 62;
+    --accent-work: 86 91 134;
+    --adm-tip: 33 110 60;
+    --adm-caution: 125 96 22;
+    --adm-danger: 176 57 43;
+    --theme-outline-width: 2px;
+    --theme-divider-width: 1.5px;
+    --audio-control-filter: none;
+    color-scheme: light;
+  }
+
+  html {
+    @apply bg-background text-text-primary antialiased;
+  }
+
+  body {
+    @apply min-h-screen bg-background text-text-primary;
+  }
+
+  /* Links: accent-colored, no underline. Chrome links (nav, footer, cards) and inline
+     content links are set apart by color; external content links also get a ↗ marker. */
+  a {
+    @apply text-accent no-underline transition-[color] duration-150;
+  }
+
+  .prose a {
+    font-weight: 400;
+    text-decoration: none;
+  }
+
+  /* Content links light up accent-blue when hovered. Structural links — heading
+     anchors, the # glyph, sidenote numbers — opt out. */
+  .prose a:not(.head-link):not(.hash):not(.sn-num):hover,
+  .prose a:not(.head-link):not(.hash):not(.sn-num):focus-visible {
+    color: rgb(var(--color-accent));
+  }
+
+  /* External content links — and anything tagged .ext-link (e.g. resume links) — get a
+     box-and-arrow marker (Material "open_in_new") drawn in the link's own color.
+     Internal prose links (/…, #…) rely on color alone. */
+  .prose a[href^="http"]:not([href*="__SITE_HOST__"])::after,
+  .ext-link::after {
+    content: "";
+    display: inline-block;
+    width: 0.72em;
+    height: 0.72em;
+    margin-left: 0.12em;
+    vertical-align: -0.06em;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='%23000'%20d='M19%2019H5V5h7V3H5c-1.11%200-2%20.9-2%202v14c0%201.1.89%202%202%202h14c1.1%200%202-.9%202-2v-7h-2v7zM14%203v2h3.59l-9.83%209.83%201.41%201.41L19%206.41V10h2V3h-7z'/%3E%3C/svg%3E") center / contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='%23000'%20d='M19%2019H5V5h7V3H5c-1.11%200-2%20.9-2%202v14c0%201.1.89%202%202%202h14c1.1%200%202-.9%202-2v-7h-2v7zM14%203v2h3.59l-9.83%209.83%201.41%201.41L19%206.41V10h2V3h-7z'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+
+  /* …but not when the link wraps an image (split out so external text links still
+     get the marker on browsers without :has()). */
+  .prose a[href^="http"]:has(img)::after {
+    content: none;
+  }
+
+  ::selection {
+    @apply bg-accent/30;
+  }
+
+  audio {
+    @apply w-full h-10 rounded;
+  }
+
+  audio::-webkit-media-controls-panel {
+    background-color: rgb(var(--color-surface));
+  }
+
+  audio::-webkit-media-controls-current-time-display,
+  audio::-webkit-media-controls-time-remaining-display {
+    color: rgb(var(--color-text-secondary));
+  }
+
+  audio::-webkit-media-controls-play-button,
+  audio::-webkit-media-controls-mute-button {
+    filter: var(--audio-control-filter);
+  }
+
+}
+
+@layer utilities {
+  :root[data-theme='light'] .border {
+    border-width: var(--theme-outline-width);
+  }
+
+  :root[data-theme='light'] .border-t {
+    border-top-width: var(--theme-divider-width);
+  }
+
+  :root[data-theme='light'] .border-b {
+    border-bottom-width: var(--theme-divider-width);
+  }
+
+  .tag.is-active {
+    @apply border-accent bg-accent text-white;
+  }
+
+  .card.is-filtered,
+  [data-filter-tags].is-filtered {
+    @apply opacity-40 grayscale;
+  }
+}

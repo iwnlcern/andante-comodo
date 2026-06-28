@@ -1,0 +1,28 @@
+---
+import { getCollection } from 'astro:content';
+import CollectionIndex from '#components/collection/CollectionIndex.astro';
+import { projectItem, byDate, dropEmptySections } from '#lib/content/collection-items';
+import type { IndexSection } from '#lib/content/collection-index';
+
+interface Props {
+  entry: {
+    label: string;
+    description?: string;
+  };
+}
+
+const { entry } = Astro.props;
+
+const projects = (await getCollection('projects')).sort(byDate);
+
+const sections: IndexSection[] = dropEmptySections([
+  { variant: 'cards', scope: 'projects', items: projects.map(projectItem) },
+]);
+---
+
+<CollectionIndex
+  title={entry.label}
+  description={entry.description}
+  sections={sections}
+  emptyText="No projects yet. Check back soon!"
+/>

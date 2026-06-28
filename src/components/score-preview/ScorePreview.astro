@@ -1,0 +1,521 @@
+---
+interface Props {
+  src: string;
+  title: string;
+}
+
+const { src, title } = Astro.props;
+---
+
+<div class="space-y-3">
+  <div class="border border-border rounded overflow-hidden bg-surface">
+    <div
+      class="pdf-viewer"
+      data-pdf-viewer
+      data-pdf-src={src}
+      aria-label={`Score preview: ${title}`}
+      role="region"
+      tabindex="0"
+    >
+      <div class="pdf-canvas-wrap">
+        <div class="pdf-canvas-row">
+          <canvas class="pdf-canvas" data-role="canvas-left" aria-hidden="true"></canvas>
+          <canvas class="pdf-canvas" data-role="canvas-right" aria-hidden="true"></canvas>
+        </div>
+      </div>
+      <div class="pdf-controls">
+        <button class="pdf-button" data-action="prev" type="button" aria-label="Previous page">
+          Prev
+        </button>
+        <span class="pdf-indicator text-xs text-text-secondary" data-role="indicator" aria-live="polite">Loading...</span>
+        <button class="pdf-button" data-action="next" type="button" aria-label="Next page">
+          Next
+        </button>
+        <div class="pdf-zoom">
+          <button class="pdf-button" data-action="zoom-out" type="button" aria-label="Zoom out">-</button>
+          <button class="pdf-button" data-action="zoom-reset" type="button" aria-label="Reset zoom">
+            <span data-role="zoom-label">100%</span>
+          </button>
+          <button class="pdf-button" data-action="zoom-in" type="button" aria-label="Zoom in">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="flex items-center justify-between gap-4">
+    <span class="text-xs text-text-secondary">Use ← → to turn pages</span>
+    <a
+      href={src}
+      download
+      class="inline-flex items-center gap-2 px-4 py-2 text-sm border border-border rounded hover:border-accent hover:text-accent transition-colors"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      Download Score
+    </a>
+  </div>
+</div>
+
+<style>
+  .pdf-viewer {
+    height: 92vh;
+    width: 100%;
+    background: rgb(var(--color-surface-contrast) / 1);
+    display: flex;
+    flex-direction: column;
+    outline: none;
+  }
+
+  .pdf-viewer:focus-visible {
+    box-shadow: inset 0 0 0 2px rgb(var(--color-accent) / 0.7);
+  }
+
+  .pdf-canvas-wrap {
+    flex: 1;
+    display: block;
+    overflow: auto;
+    padding: 1rem;
+    text-align: center;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .pdf-canvas-row {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 1rem;
+    width: max-content;
+    margin: 0 auto;
+  }
+
+  .pdf-canvas {
+    display: block;
+    max-width: none;
+    max-height: none;
+    flex: 0 0 auto;
+    border-radius: 0.5rem;
+    background: rgb(var(--color-surface) / 1);
+  }
+
+  .pdf-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.65rem 0.9rem;
+    border-top: 1px solid rgb(var(--color-border) / 1);
+    background: rgb(var(--color-surface) / 1);
+  }
+
+  .pdf-indicator {
+    flex: 1;
+    text-align: center;
+  }
+
+  .pdf-zoom {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .pdf-button {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgb(var(--color-border) / 1);
+    color: rgb(var(--color-text-primary) / 1);
+    background: transparent;
+    transition: border-color 150ms ease, color 150ms ease;
+  }
+
+  .pdf-button:hover:not(:disabled) {
+    border-color: rgb(var(--color-accent) / 1);
+    color: rgb(var(--color-accent) / 1);
+  }
+
+  .pdf-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+</style>
+
+<script>
+  import * as pdfjsLib from 'pdfjs-dist/build/pdf.mjs';
+  import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
+  import {
+    computeFitScale,
+    maxSpreadStart,
+    normalizeSpreadStart,
+    nextSpreadStart,
+    prevSpreadStart,
+    spreadIndicator,
+    zoomStep,
+  } from '#lib/score-preview-pagination.mjs';
+
+  pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+
+  const initViewers = () => {
+    const viewers = Array.from(document.querySelectorAll('[data-pdf-viewer]'));
+
+    viewers.forEach((container) => {
+      if (!(container instanceof HTMLElement)) return;
+      if (container.dataset.initialized === 'true') return;
+
+      const src = container.dataset.pdfSrc;
+      if (!src) return;
+
+      const canvas = container.querySelector('[data-role="canvas-left"]');
+      const canvasRight = container.querySelector('[data-role="canvas-right"]');
+      const prevButton = container.querySelector('[data-action="prev"]');
+      const nextButton = container.querySelector('[data-action="next"]');
+      const zoomOutButton = container.querySelector('[data-action="zoom-out"]');
+      const zoomInButton = container.querySelector('[data-action="zoom-in"]');
+      const zoomResetButton = container.querySelector('[data-action="zoom-reset"]');
+      const zoomLabel = container.querySelector('[data-role="zoom-label"]');
+      const indicator = container.querySelector('[data-role="indicator"]');
+      const wrap = container.querySelector('.pdf-canvas-wrap');
+      const row = container.querySelector('.pdf-canvas-row');
+
+      if (
+        !(canvas instanceof HTMLCanvasElement) ||
+        !(canvasRight instanceof HTMLCanvasElement) ||
+        !(prevButton instanceof HTMLButtonElement) ||
+        !(nextButton instanceof HTMLButtonElement) ||
+        !(zoomOutButton instanceof HTMLButtonElement) ||
+        !(zoomInButton instanceof HTMLButtonElement) ||
+        !(zoomResetButton instanceof HTMLButtonElement) ||
+        !(zoomLabel instanceof HTMLElement) ||
+        !(indicator instanceof HTMLElement) ||
+        !(wrap instanceof HTMLElement) ||
+        !(row instanceof HTMLElement)
+      ) {
+        return;
+      }
+
+      container.dataset.initialized = 'true';
+
+      const ctx = canvas.getContext('2d', { alpha: false });
+      const ctxRight = canvasRight.getContext('2d', { alpha: false });
+      let pdfDoc = null;
+      let currentPage = 1;
+      let totalPages = 1;
+      let isRendering = false;
+      let latestRequestedPage = 1;
+      let renderInterrupted = false;
+      let currentRenderTasks = [];
+      let resizeRaf = 0;
+      let resizeTimer = 0;
+      let resizeObservationStarted = false;
+      let loadingTask = null;
+      let destroyed = false;
+      let renderCount = 0;
+      let zoom = 1;
+      const minZoom = 0.6;
+      const maxZoom = 2.0;
+      let lastZoom = zoom;
+      let isDragging = false;
+      let dragStartX = 0;
+      let dragStartY = 0;
+      let dragScrollLeft = 0;
+      let dragScrollTop = 0;
+
+      const centerRow = () => {
+        requestAnimationFrame(() => {
+          const extraWidth = row.scrollWidth - wrap.clientWidth;
+          wrap.scrollLeft = extraWidth > 0 ? Math.round(extraWidth / 2) : 0;
+        });
+      };
+
+      const startDrag = (event) => {
+        const target = event.target;
+        if (target instanceof Element && target.closest('.pdf-controls')) return;
+        isDragging = true;
+        dragStartX = event.clientX;
+        dragStartY = event.clientY;
+        dragScrollLeft = wrap.scrollLeft;
+        dragScrollTop = wrap.scrollTop;
+        wrap.style.cursor = 'grabbing';
+        event.preventDefault();
+      };
+
+      const moveDrag = (event) => {
+        if (!isDragging) return;
+        const deltaX = event.clientX - dragStartX;
+        const deltaY = event.clientY - dragStartY;
+        wrap.scrollLeft = dragScrollLeft - deltaX;
+        wrap.scrollTop = dragScrollTop - deltaY;
+      };
+
+      const endDrag = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        wrap.style.cursor = '';
+      };
+
+      const updateControls = () => {
+        const { left, right, total } = spreadIndicator(currentPage, totalPages);
+        indicator.textContent = right
+          ? `Pages ${left}-${right} / ${total}`
+          : `Page ${left} / ${total}`;
+        prevButton.disabled = totalPages <= 1 || currentPage <= 1;
+        const maxStart = maxSpreadStart(totalPages);
+        nextButton.disabled = totalPages <= 1 || currentPage >= maxStart;
+        zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
+      };
+
+      const isRenderCancelled = (error) =>
+        error?.name === 'RenderingCancelledException' ||
+        /Rendering cancelled/i.test(String(error?.message ?? ''));
+
+      const cancelCurrentRenderTasks = () => {
+        currentRenderTasks.forEach((task) => {
+          try {
+            task?.cancel?.();
+          } catch {}
+        });
+      };
+
+      const renderPdfPage = async (page, targetCanvas, targetCtx, viewport) => {
+        targetCtx.setTransform(1, 0, 0, 1, 0, 0);
+        const task = page.render({ canvasContext: targetCtx, viewport });
+        currentRenderTasks.push(task);
+        await task.promise;
+      };
+
+      const renderSpread = async (pageNumber) => {
+        if (!pdfDoc || !ctx || !ctxRight || destroyed) return;
+        const leftPage = await pdfDoc.getPage(pageNumber);
+        const rightPage =
+          pageNumber !== 1 && pageNumber + 1 <= totalPages
+            ? await pdfDoc.getPage(pageNumber + 1)
+            : null;
+
+        if (destroyed || renderInterrupted || latestRequestedPage !== pageNumber) return;
+
+        const leftViewport = leftPage.getViewport({ scale: 1 });
+        const rightViewport = rightPage ? rightPage.getViewport({ scale: 1 }) : null;
+
+        const wrapWidth = wrap.clientWidth || 1;
+        const wrapHeight = wrap.clientHeight || 1;
+        const scale = computeFitScale(wrapWidth, wrapHeight, leftViewport, rightViewport, zoom);
+        const outputScale = window.devicePixelRatio || 1;
+        const leftScaled = leftPage.getViewport({ scale: scale * outputScale });
+        const rightScaled = rightPage ? rightPage.getViewport({ scale: scale * outputScale }) : null;
+
+        canvas.width = Math.floor(leftScaled.width);
+        canvas.height = Math.floor(leftScaled.height);
+        canvas.style.width = `${Math.floor(leftScaled.width / outputScale)}px`;
+        canvas.style.height = `${Math.floor(leftScaled.height / outputScale)}px`;
+
+        if (destroyed || renderInterrupted || latestRequestedPage !== pageNumber) return;
+        await renderPdfPage(leftPage, canvas, ctx, leftScaled);
+
+        if (destroyed || renderInterrupted || latestRequestedPage !== pageNumber) return;
+
+        if (rightPage && rightScaled) {
+          canvasRight.hidden = false;
+          canvasRight.width = Math.floor(rightScaled.width);
+          canvasRight.height = Math.floor(rightScaled.height);
+          canvasRight.style.width = `${Math.floor(rightScaled.width / outputScale)}px`;
+          canvasRight.style.height = `${Math.floor(rightScaled.height / outputScale)}px`;
+          await renderPdfPage(rightPage, canvasRight, ctxRight, rightScaled);
+          if (destroyed || renderInterrupted || latestRequestedPage !== pageNumber) return;
+        } else {
+          canvasRight.hidden = true;
+          canvasRight.width = 1;
+          canvasRight.height = 1;
+          canvasRight.style.width = '1px';
+          canvasRight.style.height = '1px';
+        }
+
+        renderCount += 1;
+        container.dataset.renderedPage = String(pageNumber);
+        container.dataset.renderCount = String(renderCount);
+        centerRow();
+
+        if (zoom !== lastZoom) {
+          wrap.scrollTop = 0;
+          centerRow();
+          lastZoom = zoom;
+        }
+      };
+
+      const drainRenderQueue = async () => {
+        if (isRendering || !pdfDoc || destroyed) return;
+
+        isRendering = true;
+        try {
+          while (!destroyed && pdfDoc) {
+            const pageToRender = latestRequestedPage;
+            renderInterrupted = false;
+            currentRenderTasks = [];
+
+            try {
+              await renderSpread(pageToRender);
+            } catch (error) {
+              if (!destroyed && !isRenderCancelled(error)) {
+                console.error(error);
+                indicator.textContent = 'Failed to render PDF';
+              }
+            } finally {
+              currentRenderTasks = [];
+            }
+
+            if (!renderInterrupted && latestRequestedPage === pageToRender) break;
+          }
+        } finally {
+          isRendering = false;
+        }
+      };
+
+      const requestRender = (pageNumber) => {
+        if (!pdfDoc || destroyed) return;
+        latestRequestedPage = normalizeSpreadStart(pageNumber, totalPages);
+        if (isRendering) {
+          renderInterrupted = true;
+          cancelCurrentRenderTasks();
+          return;
+        }
+        void drainRenderQueue();
+      };
+
+      const goToPage = (pageNumber) => {
+        if (!pdfDoc) return;
+        const next = normalizeSpreadStart(pageNumber, totalPages);
+        if (next === currentPage) return;
+        currentPage = next;
+        updateControls();
+        requestRender(currentPage);
+      };
+
+      const onPrevClick = () => {
+        goToPage(prevSpreadStart(currentPage));
+      };
+      const onNextClick = () => {
+        goToPage(nextSpreadStart(currentPage));
+      };
+      const onZoomOutClick = () => {
+        zoom = zoomStep(zoom, -0.1, minZoom, maxZoom);
+        updateControls();
+        requestRender(currentPage);
+      };
+      const onZoomInClick = () => {
+        zoom = zoomStep(zoom, 0.1, minZoom, maxZoom);
+        updateControls();
+        requestRender(currentPage);
+      };
+      const onZoomResetClick = () => {
+        zoom = 1;
+        updateControls();
+        requestRender(currentPage);
+      };
+
+      const onKeydown = (ev) => {
+        const handled = ['ArrowRight', 'ArrowLeft', 'PageDown', 'PageUp', ' ', 'Home', 'End'].includes(
+          ev.key
+        );
+        if (!handled) return;
+        ev.preventDefault();
+        if (ev.key === 'ArrowRight' || ev.key === 'PageDown' || ev.key === ' ') {
+          goToPage(nextSpreadStart(currentPage));
+        } else if (ev.key === 'ArrowLeft' || ev.key === 'PageUp') {
+          goToPage(prevSpreadStart(currentPage));
+        } else if (ev.key === 'Home') {
+          goToPage(1);
+        } else if (ev.key === 'End') {
+          goToPage(maxSpreadStart(totalPages));
+        }
+      };
+
+      const onContainerPointerDown = () => {
+        container.focus({ preventScroll: true });
+      };
+
+      const onWrapPointerDown = (event) => {
+        wrap.setPointerCapture(event.pointerId);
+        startDrag(event);
+      };
+      const onWrapPointerUp = (event) => {
+        try {
+          wrap.releasePointerCapture(event.pointerId);
+        } catch {}
+        endDrag();
+      };
+
+      prevButton.addEventListener('click', onPrevClick);
+      nextButton.addEventListener('click', onNextClick);
+      zoomOutButton.addEventListener('click', onZoomOutClick);
+      zoomInButton.addEventListener('click', onZoomInClick);
+      zoomResetButton.addEventListener('click', onZoomResetClick);
+      container.addEventListener('keydown', onKeydown);
+      container.addEventListener('pointerdown', onContainerPointerDown);
+      wrap.addEventListener('pointerdown', onWrapPointerDown);
+      wrap.addEventListener('pointermove', moveDrag);
+      wrap.addEventListener('pointerup', onWrapPointerUp);
+      wrap.addEventListener('pointerleave', endDrag);
+
+      const observer = new ResizeObserver(() => {
+        if (!resizeObservationStarted) {
+          resizeObservationStarted = true;
+          return;
+        }
+        cancelAnimationFrame(resizeRaf);
+        window.clearTimeout(resizeTimer);
+        resizeRaf = requestAnimationFrame(() => {
+          resizeTimer = window.setTimeout(() => requestRender(currentPage), 100);
+        });
+      });
+      observer.observe(wrap);
+
+      const teardown = () => {
+        if (destroyed) return;
+        destroyed = true;
+        cancelAnimationFrame(resizeRaf);
+        window.clearTimeout(resizeTimer);
+        observer.disconnect();
+        cancelCurrentRenderTasks();
+        prevButton.removeEventListener('click', onPrevClick);
+        nextButton.removeEventListener('click', onNextClick);
+        zoomOutButton.removeEventListener('click', onZoomOutClick);
+        zoomInButton.removeEventListener('click', onZoomInClick);
+        zoomResetButton.removeEventListener('click', onZoomResetClick);
+        container.removeEventListener('keydown', onKeydown);
+        container.removeEventListener('pointerdown', onContainerPointerDown);
+        wrap.removeEventListener('pointerdown', onWrapPointerDown);
+        wrap.removeEventListener('pointermove', moveDrag);
+        wrap.removeEventListener('pointerup', onWrapPointerUp);
+        wrap.removeEventListener('pointerleave', endDrag);
+        loadingTask?.destroy?.();
+        pdfDoc?.destroy?.();
+        pdfDoc = null;
+      };
+      document.addEventListener('astro:before-swap', teardown, { once: true });
+
+      (async () => {
+        try {
+          indicator.textContent = 'Loading...';
+          loadingTask = pdfjsLib.getDocument(src);
+          pdfDoc = await loadingTask.promise;
+          if (destroyed) {
+            pdfDoc?.destroy?.();
+            pdfDoc = null;
+            return;
+          }
+          totalPages = pdfDoc.numPages;
+          currentPage = 1;
+          latestRequestedPage = currentPage;
+          updateControls();
+          requestRender(currentPage);
+        } catch (err) {
+          if (!destroyed) {
+            console.error(err);
+            indicator.textContent = 'Failed to load PDF';
+          }
+        }
+      })();
+    });
+  };
+
+  initViewers();
+  document.addEventListener('astro:after-swap', initViewers);
+</script>

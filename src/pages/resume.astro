@@ -1,0 +1,129 @@
+---
+import BaseLayout from '#layouts/BaseLayout.astro';
+import ResumeEntry from '#components/resume/ResumeEntry.astro';
+import {
+  education,
+  experience,
+  interests,
+  profile,
+  projects,
+  publications,
+  skills,
+} from '#data/resume';
+import { site } from '#config/site.mjs';
+import { obfuscateEmail, obfuscatePhone } from '#lib/contact-obfuscation.mjs';
+
+const githubLabel = site.social.github.replace(/^https?:\/\//, '').replace(/\/$/, '');
+const linkedinLabel = site.social.linkedin.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+---
+
+<BaseLayout title="Resume" description={`Resume for ${profile.name}.`}>
+  <article class="resume-base max-w-4xl mx-auto font-dense">
+    <header class="border-b border-border pb-6 mb-8">
+      <h1 class="text-4xl font-bold font-dense">{profile.name}</h1>
+      <p class="text-text-secondary mt-2">{profile.location}</p>
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm mt-3">
+        {profile.phone && (
+          <Fragment>
+            <span>{obfuscatePhone(profile.phone)}</span>
+            <span class="text-text-secondary">|</span>
+          </Fragment>
+        )}
+        <span class="text-text-primary">{obfuscateEmail(site.email)}</span>
+        <span class="text-text-secondary">|</span>
+        <a href={site.social.linkedin} class="text-accent ext-link">
+          {linkedinLabel}
+        </a>
+        <span class="text-text-secondary">|</span>
+        <a href={site.social.github} class="text-accent ext-link">
+          {githubLabel}
+        </a>
+      </div>
+    </header>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold mb-4 font-dense">Education</h2>
+      <div class="space-y-3">
+        <div class="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+          <div>
+            <h3 class="font-semibold font-dense">{education.school}</h3>
+            <p class="text-text-secondary">
+              {education.degree}
+            </p>
+          </div>
+          <div class="text-sm text-text-secondary sm:text-right">
+            <div>{education.dates}</div>
+            <div>{education.gpa}</div>
+          </div>
+        </div>
+        <ul class="list-disc pl-5 text-sm text-text-secondary space-y-1">
+          {education.coursework.map((item) => (
+            <li>
+              <span class="font-semibold text-text-primary">{item.label}:</span>
+              {' '}
+              {item.text}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold mb-4 font-dense">Experience</h2>
+      <div class="space-y-6">
+        {experience.map((entry) => <ResumeEntry {...entry} />)}
+      </div>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold mb-4 font-dense">Projects</h2>
+      <div class="space-y-6">
+        {projects.map((entry) => <ResumeEntry {...entry} />)}
+      </div>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold mb-4 font-dense">Publications</h2>
+      <div class="space-y-4">
+        {publications.map((pub) => (
+          <div class="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+            <div>
+              <h3 class="font-semibold font-dense">
+                <a href={pub.href} class="text-accent ext-link">
+                  {pub.title}
+                </a>
+              </h3>
+              <p class="text-text-secondary text-sm">
+                {pub.coauthors}<span class="text-text-primary font-semibold">{profile.citationName}</span>
+              </p>
+              <p class="text-text-secondary text-sm">{pub.venue}</p>
+            </div>
+            <div class="text-sm text-text-secondary sm:text-right">
+              <div>{pub.date}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold mb-4 font-dense">Skills</h2>
+      <div class="text-sm text-text-secondary space-y-2">
+        {skills.map((item) => (
+          <p>
+            <span class="font-semibold text-text-primary">{item.label}:</span>
+            {' '}
+            {item.text}
+          </p>
+        ))}
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold mb-4 font-dense">Interests</h2>
+      <p class="text-sm text-text-secondary">
+        {interests}
+      </p>
+    </section>
+  </article>
+</BaseLayout>

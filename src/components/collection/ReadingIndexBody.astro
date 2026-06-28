@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+import CollectionIndex from '#components/collection/CollectionIndex.astro';
+import { bookItem, articleItem, byRating, byDate, dropEmptySections } from '#lib/content/collection-items';
+import { taxonomyLabel } from '#lib/content/collection-registry.mjs';
+import type { IndexSection } from '#lib/content/collection-index';
+
+interface Props {
+  entry: {
+    label: string;
+    description?: string;
+  };
+}
+
+const { entry } = Astro.props;
+
+const allReading = await getCollection('reading');
+const books = allReading.filter((item) => item.data.type === 'book');
+const statuses = ['reading', 'read', 'want-to-read'] as const;
+
+const bookSections: IndexSection[] = statuses.map((status) => ({
+  label: taxonomyLabel('reading', status),
+  variant: 'rows',
+  scope: `reading-${status}`,
+  items: books
+    .filter((book) => book.data.status === status)
+    .sort(byRating)
+    .map(bookItem),
+}));
+
+const articleItems = allReading
+  .filter((item) => item.data.type === 'article')
+  .sort(byDate)
+  .map(articleItem);
+
+const sections: IndexSection[] = dropEmptySections([
+  ...bookSections,
+  { label: 'Articles', variant: 'rows', scope: 'reading-articles', items: articleItems },
+]);
+---
+
+<CollectionIndex title={entry.label} description={entry.description} sections={sections} />

@@ -1,0 +1,48 @@
+---
+interface Props {
+  instrumentation?: string;
+  duration?: string;
+  description?: string;
+}
+
+const { instrumentation, duration, description } = Astro.props;
+
+const hasDetails = instrumentation || duration || description;
+---
+
+{hasDetails && (
+  <details class="group border border-border rounded">
+    <summary class="px-4 py-3 cursor-pointer text-sm text-text-secondary hover:text-text-primary transition-colors list-none flex items-center gap-2">
+      <svg
+        class="w-4 h-4 transition-transform group-open:rotate-90"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+      Details
+    </summary>
+    <div class="px-4 pb-4 space-y-3">
+      {instrumentation && (
+        <div>
+          <span class="text-xs text-text-secondary uppercase tracking-wide">Instrumentation</span>
+          <p class="text-sm text-text-primary">{instrumentation}</p>
+        </div>
+      )}
+      {duration && (
+        <div>
+          <span class="text-xs text-text-secondary uppercase tracking-wide">Duration</span>
+          <p class="text-sm text-text-primary">{duration}</p>
+        </div>
+      )}
+      {description && (
+        <div>
+          <span class="text-xs text-text-secondary uppercase tracking-wide">Program Notes</span>
+          <p class="text-sm text-text-primary">{description}</p>
+        </div>
+      )}
+    </div>
+  </details>
+)}

@@ -1,0 +1,49 @@
+---
+import EntryLayout from './EntryLayout.astro';
+import Tag from '#components/common/Tag.astro';
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  date?: Date;
+  tags: string[];
+  headings?: Heading[];
+  backHref?: string;
+  backLabel?: string;
+  dateLabel?: string;
+}
+
+const {
+  title,
+  description,
+  date,
+  tags,
+  headings = [],
+  backHref = '/blog',
+  backLabel = 'Back to blog',
+  dateLabel,
+} = Astro.props;
+
+const formattedDate = date
+  ? date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })
+  : null;
+---
+
+<EntryLayout title={title} description={description} backHref={backHref} backLabel={backLabel} readingApparatus headings={headings}>
+  <div slot="meta" class="flex flex-wrap items-center gap-3 text-sm text-text-secondary">
+    {date && (
+      <time datetime={date.toISOString()}>{dateLabel ? `${dateLabel} ${formattedDate}` : formattedDate}</time>
+    )}
+    {date && tags.length > 0 && <span>·</span>}
+    {tags.map((tag) => (
+      <Tag tag={tag} href={`/tags/${tag}`} />
+    ))}
+  </div>
+  <slot />
+</EntryLayout>

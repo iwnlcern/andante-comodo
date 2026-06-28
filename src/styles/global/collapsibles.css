@@ -1,0 +1,67 @@
+/* collapsible reference sections — boxed, chevron far right, smooth on --ease-brake */
+.post-prose details.collapse-section {
+  margin: 1.5rem 0;
+  border: 1px solid rgb(var(--color-border));
+  border-radius: 0.6rem;
+  background: rgb(var(--color-surface-muted) / 0.5);
+  overflow: hidden;
+}
+.post-prose details.collapse-section > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+  padding: 0.7rem 1.1rem;
+  list-style: none;
+}
+.post-prose details.collapse-section > summary::-webkit-details-marker {
+  display: none;
+}
+.post-prose details.collapse-section > summary:hover {
+  background: rgb(var(--color-surface-muted));
+}
+.post-prose details.collapse-section > summary > :is(h2, h3, h4) {
+  margin: 0;
+}
+.post-prose .collapse-chevron {
+  line-height: 0;
+  color: rgb(var(--color-text-secondary));
+  flex: none;
+}
+.post-prose .collapse-chevron svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.25s var(--ease-brake, ease);
+}
+.post-prose details.collapse-section[open] .collapse-chevron svg {
+  transform: rotate(180deg);
+}
+.post-prose .collapse-content {
+  overflow: hidden;
+  transition: max-height 0.42s var(--ease-brake, ease);
+}
+.post-prose details.collapse-section:not([open]) .collapse-content {
+  max-height: 0;
+}
+.post-prose .collapse-content > * {
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 1.1rem;
+  padding-right: 1.1rem;
+}
+.post-prose .collapse-content > :first-child {
+  margin-top: 0.7rem;
+}
+.post-prose .collapse-content > :last-child {
+  margin-bottom: 0;
+  padding-bottom: 1rem;
+}
+.post-prose details.collapse-section[open] > summary {
+  border-bottom: 1px solid rgb(var(--color-border));
+}

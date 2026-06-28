@@ -1,0 +1,38 @@
+/* ── THEME CONTROL SURFACE ──────────────────────────────────────────────
+   This file owns the RUNTIME knobs below: type sizes (--prose-size, --ui-base),
+   reading measure (--measure), rhythm, flow/secondary-text tokens, --font-* roles.
+   Siblings:  base-layered.css → palette (--color-*)
+              tailwind.config.mjs → UI scale SHAPE (SCALE_RATIO + steps)
+   Full guide + font-swap procedure: docs/theming.md
+   ──────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --ease-brake: cubic-bezier(.7, 0, .85, 1);
+  --font-display: 'Bodoni Std', 'Bodoni 72', Didot, Georgia, serif;
+  --font-serif: 'EB Garamond', 'Iowan Old Style', Georgia, serif;
+  --font-code: 'Comic Mono', ui-monospace, monospace;
+  --measure: 50rem;
+  --lh: 1.7;
+  --rhythm: calc(1em * var(--lh));
+  /* Half the reading measure. Sidenote/TOC gutter geometry derives from this, so changing
+     --measure stays safe (no hard-coded column-half). */
+  --measure-half: calc(var(--measure) / 2);
+
+  /* Type scale — TWO knobs.
+     --prose-size : reading body for all content. Headings (typography.css) are `em` ratios of it.
+     --ui-base    : everything else (chrome, home, collections). The Tailwind fontSize steps
+                    are ratios of this, so the whole UI scale resizes from this one value. */
+  --prose-size: 1.375rem;
+  /* Anchored to the reading body: text-base == prose body, so site-wide content reads at one
+     size; chrome (text-sm/xs) falls below it. Nudge up to ~1.4rem for a punchier landing feel. */
+  --ui-base: 1.33rem;
+
+  /* Flow spacing: multipliers of --rhythm for the three prose block relationships. */
+  --flow-gap: 0.85;
+  --flow-above-heading: 0.5;
+  --flow-below-heading: 0.35;
+
+  /* Secondary text scales, in em so they stay relative to their surrounding prose. */
+  --code-scale: 0.85em;
+  --note-scale: 0.9em;
+}
