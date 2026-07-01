@@ -16,7 +16,7 @@ const { title, subtitle, link, location, dates, gpa, bullets = [] } = Astro.prop
     <div>
       <h3 class="font-semibold font-dense">{title}</h3>
       {subtitle && <p class="text-text-secondary">{subtitle}</p>}
-      {link && <a href={link.href} class="text-sm text-accent ext-link">{link.label}</a>}
+      {link && <a href={link.href} class:list={["text-sm text-accent", { "ext-link": /^https?:\/\//.test(link.href) }]}>{link.label}</a>}
     </div>
     <div class="text-sm text-text-secondary sm:text-right">
       {location && <div>{location}</div>}

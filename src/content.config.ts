@@ -7,9 +7,18 @@ const blog = defineCollection({
     title: z.string(),
     description: z.string(),
     date: z.coerce.date(),
+    updated: z.coerce.date().optional(),
     category: z.enum(['technical', 'slice-of-life', 'rants']),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    epistemic: z.string().optional(),
+    ai: z
+      .object({
+        level: z.number().int().min(0).max(5),
+        tools: z.array(z.string()).optional(),
+        note: z.string().optional(),
+      })
+      .optional(),
   }),
 });
 

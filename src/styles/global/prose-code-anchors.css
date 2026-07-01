@@ -18,8 +18,8 @@
   padding: 0.08em 0.34em;
   font-size: var(--code-scale);
   font-weight: 400;
-  /* accent blue: lighter in dark mode, darker in light mode (themed token) */
-  color: rgb(var(--color-accent));
+  /* Demoted from accent: the box, border, and Comic Mono already signal code. */
+  color: rgb(var(--color-text-primary));
 }
 .prose :not(pre) > code::before,
 .prose :not(pre) > code::after {

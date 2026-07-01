@@ -23,12 +23,8 @@ const linkedinLabel = site.social.linkedin.replace(/^https?:\/\/(www\.)?/, '').r
       <h1 class="text-4xl font-bold font-dense">{profile.name}</h1>
       <p class="text-text-secondary mt-2">{profile.location}</p>
       <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm mt-3">
-        {profile.phone && (
-          <Fragment>
-            <span>{obfuscatePhone(profile.phone)}</span>
-            <span class="text-text-secondary">|</span>
-          </Fragment>
-        )}
+        <span>{obfuscatePhone(profile.phone)}</span>
+        <span class="text-text-secondary">|</span>
         <span class="text-text-primary">{obfuscateEmail(site.email)}</span>
         <span class="text-text-secondary">|</span>
         <a href={site.social.linkedin} class="text-accent ext-link">

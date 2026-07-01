@@ -1,0 +1,62 @@
+---
+/**
+ * CSS-only hover/focus popover for the post metadata row. A positioned wrapper
+ * holds the `trigger` slot and a tooltip card (default slot) that appears on
+ * hover and keyboard focus — no JavaScript, so it works with scripting off.
+ *
+ * The card is decorative (`role="tooltip"`, `aria-hidden`); the accessible text
+ * belongs on the trigger's own `aria-label`.
+ */
+---
+
+<span class="meta-popover">
+  <slot name="trigger" />
+  <span class="meta-popover-card" role="tooltip" aria-hidden="true">
+    <slot />
+  </span>
+</span>
+
+<style>
+  .meta-popover {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .meta-popover-card {
+    position: absolute;
+    bottom: calc(100% + 0.45rem);
+    left: 50%;
+    z-index: 20;
+    width: max-content;
+    max-width: 17rem;
+    padding: 0.5rem 0.65rem;
+    background: rgb(var(--color-surface));
+    border: 1px solid rgb(var(--color-border));
+    border-radius: 0.375rem;
+    box-shadow: 0 6px 20px rgb(0 0 0 / 0.16);
+    color: rgb(var(--color-text-primary));
+    font-size: var(--note-scale);
+    line-height: 1.5;
+    text-align: left;
+    white-space: normal;
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, 0.25rem);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    pointer-events: none;
+  }
+
+  .meta-popover:hover .meta-popover-card,
+  .meta-popover:focus-within .meta-popover-card {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .meta-popover-card {
+      transition: none;
+    }
+  }
+</style>

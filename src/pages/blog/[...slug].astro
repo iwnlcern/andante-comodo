@@ -2,19 +2,32 @@
 import { render } from 'astro:content';
 import PostLayout from '#layouts/PostLayout.astro';
 import { collectionPaths } from '#lib/content/collection-paths';
+import { readingStats } from '#lib/content/reading-stats.mjs';
+import { gitLastModified } from '#lib/content/git-dates.mjs';
+import { resolveUpdated } from '#lib/content/post-meta.mjs';
 
 export const getStaticPaths = () => collectionPaths('blog', { propKey: 'post', draftGated: true });
 
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
+
+const { words, minutes } = readingStats(post.body ?? '');
+const effectiveUpdated = resolveUpdated(post.data.date, post.data.updated ?? null, gitLastModified(post));
 ---
 
 <PostLayout
   title={post.data.title}
   description={post.data.description}
   date={post.data.date}
+  updated={effectiveUpdated ?? undefined}
+  datePublished={post.data.date}
+  dateModified={effectiveUpdated ?? undefined}
   tags={post.data.tags}
   headings={headings}
+  wordCount={words}
+  readingMinutes={minutes}
+  epistemic={post.data.epistemic}
+  ai={post.data.ai}
 >
   <Content />
 </PostLayout>

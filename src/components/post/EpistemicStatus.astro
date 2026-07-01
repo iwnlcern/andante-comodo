@@ -1,0 +1,28 @@
+---
+interface Props {
+  value: string;
+}
+
+const { value } = Astro.props;
+---
+
+<aside class="epistemic-note">
+  <span class="epistemic-label">Epistemic status:</span> {value}
+</aside>
+
+<style>
+  .epistemic-note {
+    margin-block-end: var(--rhythm, 1.7rem);
+    padding-inline-start: 1rem;
+    border-inline-start: 3px solid rgb(var(--color-accent));
+    color: rgb(var(--color-text-primary));
+    font-style: italic;
+    font-size: var(--prose-size, 1.375rem);
+    line-height: var(--lh, 1.7);
+  }
+
+  .epistemic-label {
+    font-style: normal;
+    font-weight: 600;
+  }
+</style>

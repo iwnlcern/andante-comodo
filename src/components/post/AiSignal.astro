@@ -1,0 +1,103 @@
+---
+import { site } from '#config/site.mjs';
+import { aiLevelName, aiLevelDescription } from '#lib/content/post-meta.mjs';
+import MetaPopover from '#components/common/MetaPopover.astro';
+
+interface AiMeta {
+  level: number;
+  tools?: string[];
+  note?: string;
+}
+
+interface Props {
+  ai: AiMeta;
+}
+
+const { ai } = Astro.props;
+const level = ai.level;
+const name = aiLevelName(level);
+const description = aiLevelDescription(level);
+// Full text for assistive tech lives on the trigger; the styled card mirrors it
+// visually (see MetaPopover). Native `title` is intentionally dropped.
+const label = `AI involvement: ${level}/5 — ${name}. ${description}`;
+const bars = [1, 2, 3, 4, 5];
+const href = (site.meta as { aiPolicyHref?: string }).aiPolicyHref;
+// Link to the AI-policy rubric when the identity config provides one; degrade to
+// a non-interactive indicator (bars + popover only) for the template case.
+const Wrapper = href ? 'a' : 'span';
+---
+
+<MetaPopover>
+  <Wrapper slot="trigger" class="ai-signal" href={href} aria-label={label}>
+    <span class="ai-bars" aria-hidden="true">
+      {bars.map((n) => (
+        <span class:list={['ai-bar', { 'is-on': n <= level }]} style={`--i:${n}`} />
+      ))}
+    </span>
+    <span class="ai-tag">AI</span>
+  </Wrapper>
+  <span class="ai-pop-level">AI involvement · {level}/5</span>
+  <span class="ai-pop-name">{name}</span>
+  <span class="ai-pop-desc">{description}</span>
+</MetaPopover>
+
+<style>
+  .ai-signal {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: rgb(var(--color-text-secondary));
+    text-decoration: none;
+    line-height: 1;
+  }
+
+  a.ai-signal:hover,
+  a.ai-signal:focus-visible {
+    color: rgb(var(--color-text-primary));
+  }
+
+  .ai-bars {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 1.5px;
+    height: 0.85em;
+  }
+
+  .ai-bar {
+    width: 2.5px;
+    border-radius: 0.5px;
+    background: currentColor;
+    opacity: 0.28;
+    height: calc(30% + (var(--i) - 1) * 17.5%);
+  }
+
+  .ai-bar.is-on {
+    opacity: 1;
+  }
+
+  .ai-tag {
+    font-size: 0.78em;
+    letter-spacing: 0.04em;
+  }
+
+  /* Card content lines (rendered into MetaPopover's default slot). */
+  .ai-pop-level {
+    display: block;
+    color: rgb(var(--color-text-secondary));
+    font-size: 0.85em;
+    letter-spacing: 0.02em;
+  }
+
+  .ai-pop-name {
+    display: block;
+    margin-top: 0.1rem;
+    font-weight: 600;
+    color: rgb(var(--color-text-primary));
+  }
+
+  .ai-pop-desc {
+    display: block;
+    margin-top: 0.2rem;
+    color: rgb(var(--color-text-secondary));
+  }
+</style>

@@ -10,15 +10,17 @@ interface Props {
   image?: string;
   wide?: boolean;
   post?: boolean;
+  datePublished?: Date;
+  dateModified?: Date;
 }
 
-const { title, description, image, wide = false, post = false } = Astro.props;
+const { title, description, image, wide = false, post = false, datePublished, dateModified } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en" class={post ? 'no-scrollbar' : undefined}>
   <head>
-    <BaseHead title={title} description={description} image={image} post={post} />
+    <BaseHead title={title} description={description} image={image} post={post} datePublished={datePublished} dateModified={dateModified} />
   </head>
   <body class="flex flex-col min-h-screen">
     <Header />

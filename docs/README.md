@@ -21,6 +21,9 @@ Required frontmatter:
 Optional frontmatter:
 - `tags` (string[])
 - `draft` (boolean)
+- `updated` (optional date) — manual override for the "Updated" date shown on a post. When omitted, the last git commit date for the file is used (best-effort; see below). Shown only when later than `date`.
+- `epistemic` (optional string) — a one-line epistemic-status / assumed-audience note, rendered as a prominent italic line at the top of the post.
+- `ai` (optional object) — AI-involvement disclosure: `level` (integer `0`–`5` on the colophon rubric; see `#how-i-use-ai`), optional `tools` (string[]) and `note` (string). Rendered as a 0–5 signal-strength indicator on the post's metadata line (hover for the exact level and rubric name; links to the colophon rubric). `level: 0` shows empty bars; absent → nothing.
 
 ### Drafts
 
