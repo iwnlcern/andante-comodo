@@ -1,6 +1,18 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
+// Shared metadata fields used by both `blog` posts and standalone `pages`, so
+// the two schemas can't drift. A one-line epistemic-status note and an
+// AI-involvement disclosure (0–5 rubric on the colophon; optional tools/note).
+const epistemicField = z.string().optional();
+const aiField = z
+  .object({
+    level: z.number().int().min(0).max(5),
+    tools: z.array(z.string()).optional(),
+    note: z.string().optional(),
+  })
+  .optional();
+
 const blog = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/blog' }),
   schema: z.object({
@@ -11,14 +23,8 @@ const blog = defineCollection({
     category: z.enum(['technical', 'slice-of-life', 'rants']),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
-    epistemic: z.string().optional(),
-    ai: z
-      .object({
-        level: z.number().int().min(0).max(5),
-        tools: z.array(z.string()).optional(),
-        note: z.string().optional(),
-      })
-      .optional(),
+    epistemic: epistemicField,
+    ai: aiField,
   }),
 });
 
@@ -95,6 +101,8 @@ const pages = defineCollection({
     title: z.string(),
     description: z.string(),
     updated: z.coerce.date().optional(),
+    epistemic: epistemicField,
+    ai: aiField,
   }),
 });
 

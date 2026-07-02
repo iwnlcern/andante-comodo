@@ -1,0 +1,59 @@
+---
+import Tag from '#components/common/Tag.astro';
+import AiSignal from '#components/post/AiSignal.astro';
+import MetaPopover from '#components/common/MetaPopover.astro';
+import { formatMetaDate } from '#lib/content/post-meta.mjs';
+
+interface AiMeta {
+  level: number;
+  tools?: string[];
+  note?: string;
+}
+
+interface Props {
+  date?: Date;
+  dateLabel?: string;
+  updated?: Date;
+  wordCount?: number;
+  readingMinutes?: number;
+  ai?: AiMeta;
+  tags?: string[];
+}
+
+const { date, dateLabel, updated, wordCount, readingMinutes, ai, tags = [] } = Astro.props;
+
+const formattedDate = date ? formatMetaDate(date) : null;
+const formattedUpdated = updated ? formatMetaDate(updated) : null;
+const readingWords = typeof wordCount === 'number' ? `${wordCount.toLocaleString('en-US')} words` : undefined;
+---
+
+<div class="flex flex-wrap items-center gap-3 text-sm text-text-secondary">
+  {date && (
+    <time datetime={date.toISOString()}>{dateLabel ? `${dateLabel} ${formattedDate}` : formattedDate}</time>
+  )}
+  {updated && (
+    <Fragment>
+      <span>·</span>
+      <time datetime={updated.toISOString()}>Updated {formattedUpdated}</time>
+    </Fragment>
+  )}
+  {typeof readingMinutes === 'number' && (
+    <Fragment>
+      <span>·</span>
+      <MetaPopover>
+        <span slot="trigger" tabindex="0" aria-label={readingWords}>{readingMinutes} min read</span>
+        {readingWords}
+      </MetaPopover>
+    </Fragment>
+  )}
+  {ai && (
+    <Fragment>
+      <span>·</span>
+      <AiSignal ai={ai} />
+    </Fragment>
+  )}
+  {tags.length > 0 && <span>·</span>}
+  {tags.map((tag) => (
+    <Tag tag={tag} href={`/tags/${tag}`} />
+  ))}
+</div>

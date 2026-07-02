@@ -1,10 +1,7 @@
 ---
 import EntryLayout from './EntryLayout.astro';
-import Tag from '#components/common/Tag.astro';
 import EpistemicStatus from '#components/post/EpistemicStatus.astro';
-import AiSignal from '#components/post/AiSignal.astro';
-import MetaPopover from '#components/common/MetaPopover.astro';
-import { formatMetaDate } from '#lib/content/post-meta.mjs';
+import PostMeta from '#components/post/PostMeta.astro';
 
 interface Heading {
   depth: number;
@@ -53,10 +50,6 @@ const {
   datePublished,
   dateModified,
 } = Astro.props;
-
-const formattedDate = date ? formatMetaDate(date) : null;
-const formattedUpdated = updated ? formatMetaDate(updated) : null;
-const readingWords = typeof wordCount === 'number' ? `${wordCount.toLocaleString('en-US')} words` : undefined;
 ---
 
 <EntryLayout
@@ -69,36 +62,16 @@ const readingWords = typeof wordCount === 'number' ? `${wordCount.toLocaleString
   datePublished={datePublished}
   dateModified={dateModified}
 >
-  <div slot="meta" class="flex flex-wrap items-center gap-3 text-sm text-text-secondary">
-    {date && (
-      <time datetime={date.toISOString()}>{dateLabel ? `${dateLabel} ${formattedDate}` : formattedDate}</time>
-    )}
-    {updated && (
-      <Fragment>
-        <span>·</span>
-        <time datetime={updated.toISOString()}>Updated {formattedUpdated}</time>
-      </Fragment>
-    )}
-    {typeof readingMinutes === 'number' && (
-      <Fragment>
-        <span>·</span>
-        <MetaPopover>
-          <span slot="trigger" tabindex="0" aria-label={readingWords}>{readingMinutes} min read</span>
-          {readingWords}
-        </MetaPopover>
-      </Fragment>
-    )}
-    {ai && (
-      <Fragment>
-        <span>·</span>
-        <AiSignal ai={ai} />
-      </Fragment>
-    )}
-    {tags.length > 0 && <span>·</span>}
-    {tags.map((tag) => (
-      <Tag tag={tag} href={`/tags/${tag}`} />
-    ))}
-  </div>
+  <PostMeta
+    slot="meta"
+    date={date}
+    dateLabel={dateLabel}
+    updated={updated}
+    wordCount={wordCount}
+    readingMinutes={readingMinutes}
+    ai={ai}
+    tags={tags}
+  />
   {epistemic && <EpistemicStatus slot="before-body" value={epistemic} />}
   <slot />
 </EntryLayout>

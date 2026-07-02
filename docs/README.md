@@ -180,4 +180,6 @@ Required frontmatter:
 - `description` (string)
 
 Optional frontmatter:
-- `updated` (YYYY-MM-DD)
+- `updated` (YYYY-MM-DD) — manual override for the "Updated" date; when omitted, the last git commit date for the file is used (best-effort). Pages have no `date`, so it is shown whenever available (no "later than published" gate).
+- `epistemic` (optional string) — same as blog: a one-line epistemic-status note rendered as a prominent italic line at the top.
+- `ai` (optional object) — same AI-involvement disclosure as blog (`level` `0`–`5`, optional `tools`/`note`), rendered as the 0–5 signal indicator on the page's metadata line.

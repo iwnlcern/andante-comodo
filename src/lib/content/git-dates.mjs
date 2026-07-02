@@ -1,10 +1,14 @@
 import { execFileSync } from 'node:child_process';
 
+// Scanned pathspec: all content collections, so `pages` (colophon, about) get
+// the git-based "Updated" fallback, not just `blog`. Page entries resolve by
+// `entry.filePath`; blog entries also reconstruct from `id` under BLOG_DIR.
+const CONTENT_DIR = 'src/content';
 const BLOG_DIR = 'src/content/blog';
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}T/;
 
 /**
- * Parse `git log --format=%cI --name-only -- src/content/blog` output into a
+ * Parse `git log --format=%cI --name-only -- src/content` output into a
  * newest-wins map of repo-relative file path -> commit Date. Git lists commits
  * newest-first, so the first date seen for a path is its last-modified.
  * @param {string} stdout
@@ -44,7 +48,7 @@ export function lookupDate(map, entry) {
 let cached;
 
 function defaultRun() {
-  return execFileSync('git', ['log', '--format=%cI', '--name-only', '--', BLOG_DIR], {
+  return execFileSync('git', ['log', '--format=%cI', '--name-only', '--', CONTENT_DIR], {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore'],
     maxBuffer: 64 * 1024 * 1024,
@@ -58,7 +62,7 @@ function loadMap(run = defaultRun) {
     const map = parseGitLog(stdout);
     if (map.size === 0) {
       console.warn(
-        '[git-dates] no git history for src/content/blog; auto "Updated" dates disabled (manual `updated:` still works)',
+        '[git-dates] no git history for src/content; auto "Updated" dates disabled (manual `updated:` still works)',
       );
     }
     cached = map;
@@ -74,7 +78,8 @@ export function __resetCache() {
 }
 
 /**
- * Last git commit date for a blog entry, or null when unavailable.
+ * Last git commit date for a content entry (blog or page), or null when
+ * unavailable.
  * @param {{ filePath?: string, id?: string }} entry
  * @param {() => string} run
  * @returns {Date | null}
