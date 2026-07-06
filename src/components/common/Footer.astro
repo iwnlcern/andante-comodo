@@ -10,9 +10,21 @@ const currentYear = new Date().getFullYear();
       <NewsletterSignup variant="footer" />
     </div>
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-      <p class="text-text-secondary text-sm">
-        &copy; {currentYear} {site.name}. All rights reserved.
-      </p>
+      <div class="text-center sm:text-left">
+        <p class="text-text-secondary text-sm">
+          &copy; {currentYear} {site.name}. All rights reserved.
+        </p>
+        {site.meta.templateHref && (
+          <p class="mt-1 text-text-secondary text-sm">
+            Like this website? <a
+              href={site.meta.templateHref}
+              class="hl-link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >Get the template</a>.
+          </p>
+        )}
+      </div>
       <div class="flex items-center gap-4">
         <a href={site.social.rss} class="text-text-secondary hover:text-text-primary text-sm">
           RSS

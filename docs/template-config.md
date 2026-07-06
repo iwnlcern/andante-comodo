@@ -21,6 +21,7 @@ The chrome reads this subset:
 | `site.name` | Page `<title>` suffix, header wordmark, footer copyright. |
 | `site.social.github` / `.linkedin` / `.rss` | Footer links. |
 | `site.meta.ogImage` | Default Open Graph / Twitter card image path. |
+| `site.meta.templateHref` | Optional. When set, the footer adds "Like this website? Get the template." linking to it. Delete the key to remove the line. |
 | `site.email` | Contact email, shown obfuscated (reassembled client-side) on `/resume` and the home-page hero. Sample data — replace with your own. |
 
 Other fields (`site.url` — the hostname is derived from it, not edited
