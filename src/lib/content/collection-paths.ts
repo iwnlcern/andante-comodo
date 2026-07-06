@@ -15,7 +15,9 @@ type PathOpts<K extends CollectionKey> = {
 export async function collectionPaths<K extends CollectionKey>(name: K, opts: PathOpts<K>) {
   if (!collectionById(name)?.enabled) return [];
 
-  const includeDrafts = process.env.INCLUDE_DRAFTS === 'true';
+  // Baked in via vite.define (astro.config.mjs): prerendering runs in workerd
+  // under the cloudflare adapter, so process.env is not available here.
+  const includeDrafts = import.meta.env.INCLUDE_DRAFTS === 'true';
   const entries = await getCollection(name, (entry: CollectionEntry<K>) => {
     if (opts.draftGated && !includeDrafts && (entry.data as { draft?: boolean }).draft) return false;
     return opts.filter ? opts.filter(entry) : true;

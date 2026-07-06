@@ -62,7 +62,10 @@ Replace these assets before publishing a real personal site.
   - Performer: U. of Chicago Orchestra; Barbara Schubert, conductor
   - Source: https://imslp.org/wiki/Symphony_No.9%2C_GMW_50_%28Mahler%2C_Gustav%29
   - License: Creative Commons Attribution-NonCommercial-NoDerivatives 3.0.
-  - Distribution note: shipped whole and unmodified. Replace for commercial use or any modified use.
+  - Processing: transcoded from VBR (~191 kbps) to 112 kbps CBR MP3 to fit Cloudflare Workers'
+    25 MiB per-asset limit. A bitrate transcode is a technical format change, not an adaptation;
+    the work is otherwise whole and unmodified.
+  - Distribution note: replace for commercial use or any modified use.
 
 ## Fonts
 

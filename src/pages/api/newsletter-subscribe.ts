@@ -1,4 +1,7 @@
 import type { APIRoute } from 'astro';
+// @astrojs/cloudflare v13 removed Astro.locals.runtime; worker env/secrets are
+// imported from the workerd runtime module instead.
+import { env as workersEnv } from 'cloudflare:workers';
 import { isRecaptchaRequired, newsletter } from '#config/newsletter';
 import { classifySubscriptionResponse, canonicalizeListmonkEnv } from '#lib/newsletter/listmonk.mjs';
 import { toRedirectUrl } from '#lib/newsletter/newsletter-redirect';
@@ -96,9 +99,12 @@ async function verifyRecaptcha(
 }
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  const runtimeEnv = (
-    (locals as { runtime?: { env?: Record<string, unknown> } })?.runtime?.env ?? {}
-  ) as Record<string, unknown>;
+  // workersEnv is the v13+ source of bindings/secrets; the locals.runtime
+  // spread is a no-op on v13 but keeps older adapter runtimes working.
+  const runtimeEnv = {
+    ...((workersEnv ?? {}) as Record<string, unknown>),
+    ...((locals as { runtime?: { env?: Record<string, unknown> } })?.runtime?.env ?? {}),
+  } as Record<string, unknown>;
   const { baseUrl: listmonkBaseUrl, listUuids } = canonicalizeListmonkEnv([
     runtimeEnv,
     import.meta.env,

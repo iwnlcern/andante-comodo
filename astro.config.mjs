@@ -2,7 +2,6 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
-import tailwind from '@astrojs/tailwind';
 import cloudflare from '@astrojs/cloudflare';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -46,10 +45,18 @@ function siteHostCssPlugin() {
 
 export default defineConfig({
   site: site.url,
-  integrations: [mdx(), sitemap(), tailwind()],
+  integrations: [mdx(), sitemap()],
   adapter: cloudflare(),
   output: 'static',
-  vite: { plugins: [siteHostCssPlugin()] },
+  vite: {
+    plugins: [siteHostCssPlugin()],
+    define: {
+      // The cloudflare adapter (v13+) prerenders inside workerd, where
+      // process.env is empty; astro.config still runs in Node, so bake the
+      // draft-inclusion flag in at config time (read via import.meta.env).
+      'import.meta.env.INCLUDE_DRAFTS': JSON.stringify(process.env.INCLUDE_DRAFTS ?? ''),
+    },
+  },
   markdown: {
     syntaxHighlight: { type: 'shiki', excludeLangs: ['mermaid'] },
     remarkPlugins: [remarkMultilineBlockquote, remarkMath],
