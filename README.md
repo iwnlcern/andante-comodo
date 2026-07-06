@@ -43,7 +43,7 @@ on your machine.
 
 1. **Get the code.** Click **Use this template** on GitHub to make your own copy,
    then clone it — or clone this repo directly.
-2. **Install Node.** You need Node 22.12 or newer. If you do not have it, install
+2. **Install Node.** You need Node 20.3 or newer. If you do not have it, install
    it from [nodejs.org](https://nodejs.org/) (the LTS build is fine).
 3. **Install dependencies:** `npm install`.
 4. **Run it locally:** `npm run dev`, then open <http://localhost:4321>.
@@ -92,21 +92,21 @@ this README is the front door; those guides are the manual.
 
 ## Build Requirements
 
-Use Node 22.12 or newer.
+Use Node 20.3 or newer.
 
 ```bash
 npm install
 npm run build
 ```
 
-The Cloudflare adapter builds the static site into `dist/client/` (plus the newsletter worker in `dist/server/`). The repository does not require secrets to build.
+The Cloudflare adapter builds static output into `dist/`. The repository does not require secrets to build.
 
 ## Deploying
 
 This site builds to static output for **Cloudflare** (the adapter is already
 configured; `wrangler.jsonc` and `.env.example` are in the repo root).
 
-1. Build: `npm run build` (static site in `dist/client/`). The static site needs **no
+1. Build: `npm run build` (output in `dist/`). The static site needs **no
    secrets** to build or deploy.
 2. Deploy with the Cloudflare CLI — `npx wrangler deploy` — or connect the repo
    in the [Cloudflare Pages](https://developers.cloudflare.com/pages/get-started/git-integration/)

@@ -120,13 +120,13 @@ This table lists the scripts available in the template package.
 | Script | Runs | Purpose |
 | ------ | ---- | ------- |
 | `npm run dev` | `astro dev` | Local dev server (http://localhost:4321). |
-| `npm run build` | `astro build` -> `dist/client` (site) + `dist/server` (worker) | Production build; auto-runs `postbuild`. |
-| `postbuild` (auto) | `pagefind --site dist/client` | Builds the Pagefind search index into `dist/client/`. No separate config. |
-| `npm run preview` | `astro preview` | Unsupported under the Cloudflare adapter; serve `dist/client/` statically instead. |
+| `npm run build` | `astro build` -> `dist/` | Production build; auto-runs `postbuild`. |
+| `postbuild` (auto) | `pagefind --site dist` | Builds the Pagefind search index into `dist/`. No separate config. |
+| `npm run preview` | `astro preview` | Unsupported under the Cloudflare adapter; serve `dist/` statically instead. |
 | `npm run rss:sync` | `node tools/rss-to-listmonk.mjs` | Newsletter RSS sync; see [listmonk-rss-automation.md](./listmonk-rss-automation.md). |
 
-Node: use `>=22.12.0` (`engines.node` in `package.json`; Astro 6 supports only
-even-numbered Node releases from 22.12 up). There is no `.nvmrc`.
+Node: use `>=20.3.0` (`engines.node` in `package.json`); CI pins Node `20`
+(`.github/workflows/rss-to-listmonk.yml`). There is no `.nvmrc`.
 
 ### Static output & the Cloudflare adapter
 
@@ -142,11 +142,11 @@ cache-busts the `<link>` tags.
 | Field | Value | Meaning |
 | ----- | ----- | ------- |
 | `name` | your Cloudflare project/worker name | Set per project; do not copy another project's name. |
-| `main` | `@astrojs/cloudflare/entrypoints/server` | Adapter-resolved worker entrypoint (v13+); the build rewrites it in the generated `dist/server/wrangler.json`. |
+| `main` | `dist/_worker.js/index.js` | Worker entry emitted by the adapter. |
 | `compatibility_date` | `2026-02-05` | Workers runtime compatibility date. |
 | `compatibility_flags` | `nodejs_compat`, `global_fetch_strictly_public` | Node compatibility plus outbound-fetch hardening. |
 | `assets.binding` | `ASSETS` | Static-assets binding name. |
-| `assets.directory` | `./dist` | Base assets directory; the generated deploy config points it at `dist/client`. |
+| `assets.directory` | `./dist` | Directory served as static assets. |
 | `observability.enabled` | `true` | Worker logging and observability. |
 
 ### Deploy to Cloudflare
@@ -154,13 +154,10 @@ cache-busts the `<link>` tags.
 Anchor for sibling docs: `#deploy-to-cloudflare`.
 
 The site deploys as a static build to Cloudflare. The build command
-(`npm run build`), output directory (`dist/client/`), and the Node version used
-by Cloudflare are set in the Cloudflare dashboard (Pages/Workers project
-settings); they are not stored in this repo. In-repo, the deploy surface is
+(`npm run build`), output directory (`dist/`), and the Node version used by
+Cloudflare are set in the Cloudflare dashboard (Pages/Workers project settings);
+they are not stored in this repo. In-repo, the deploy surface is
 `wrangler.jsonc` (above) and the Cloudflare adapter in `astro.config.mjs`.
-CLI deploys remain `npx wrangler deploy`: the build writes a redirected config
-(`.wrangler/deploy/config.json` -> `dist/server/wrangler.json`) that wrangler
-picks up automatically.
 
 ## Demo audio licensing
 
