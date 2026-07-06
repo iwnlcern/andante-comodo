@@ -9,6 +9,9 @@ export const site = {
   meta: {
     description: 'Composer and conductor, presented as a replaceable demo identity for this Astro template.',
     ogImage: '/og-image.png',
+    // Footer "Like this website? Get the template." link. Keep it to credit
+    // the template, or delete the key to remove the footer line.
+    templateHref: 'https://github.com/iwnlcern/andante-comodo',
   },
   hero: {
     eyebrow: 'Composer | Conductor | Opera Director',
