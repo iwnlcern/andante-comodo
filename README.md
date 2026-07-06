@@ -65,6 +65,11 @@ When you are ready to make it yours, follow **First Files To Edit** and the
 
 Keep `src/config/site.mjs` and `src/config/collections.mjs` key names stable. The template's pages and feeds read those keys directly.
 
+One heads-up: the footer shows a small "Like this website? Get the template."
+line linking back to this repo, driven by `site.meta.templateHref`. Keeping it
+is a nice way to credit the template, but it is entirely optional — delete that
+key and the line disappears.
+
 ### Re-skinning: making it yours
 
 The checklist above is the *what*; here is the *order* and where the details
