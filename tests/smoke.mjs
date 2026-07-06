@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
 import { site } from '../src/config/site.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const dist = path.join(root, 'dist');
+// Static output lives in dist/client since @astrojs/cloudflare v13.
+const dist = path.join(root, 'dist', 'client');
 const publicDir = path.join(root, 'public');
 
 function routeExists(route) {
