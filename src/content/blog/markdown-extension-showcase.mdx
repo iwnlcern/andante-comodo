@@ -2,9 +2,15 @@
 title: "Markdown Extension Showcase"
 description: "A full tour of the long-form Markdown extensions the template adds — admonitions, math, Mermaid, figures, directives, sidenotes, and collapsibles."
 date: 2026-02-20
+updated: 2026-03-14
 category: "technical"
 tags: ["markdown", "demo", "template"]
 draft: false
+epistemic: "A living demo — this post tracks the template's markdown pipeline as it grows."
+ai:
+  level: 3
+  tools: ["Claude"]
+  note: "Demo values — set your own disclosure per post."
 ---
 
 This post is a working tour of every long-form Markdown extension the template adds on top of plain Markdown. Read it rendered to see the features; read its source (`src/content/blog/markdown-extension-showcase.mdx`) to copy the syntax.[^margin-note] The rich extensions run only in the `blog` and `pages` collections.[^scope] Keep one showcase post around while you adapt the template — it makes rendering regressions easy to spot — then replace it once you have settled on what you want.[^long]
@@ -114,6 +120,17 @@ tags: ["example"]
 draft: false
 ---
 ```
+
+## Post metadata
+
+The metadata line under the title is mostly automatic: publish date, an "Updated" date (from `updated:` in frontmatter when set, otherwise the file's git history), reading time, and a word-count popover.
+
+Two opt-in frontmatter fields complete the apparatus, and this post now uses both:
+
+- `epistemic:` — a one-line status note, rendered as the banner above this post's intro. Use it to tell readers how settled the writing is ("a living document", "notes from one rehearsal", …).
+- `ai:` — an AI-involvement disclosure on a 0–5 rubric (`level`, plus optional `tools` and `note`), rendered as the small signal-strength indicator in the metadata line. Hover it for the level name and description; `level: 0` renders empty bars — the Adagietto demo post shows that state. If you set `meta.aiPolicyHref` in `src/config/site.mjs`, the indicator links to your own AI-use policy page.
+
+Both fields work on `blog` posts and `pages`; the field reference lives in `docs/README.md`.
 
 ## Sources
 
