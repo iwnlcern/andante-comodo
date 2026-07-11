@@ -77,6 +77,14 @@ export function unlistedBlogSlugs(dir = 'src/content/blog') {
       if (typeof data.slug !== 'string' || data.slug === '') {
         throw new Error(`${rel}: slug override must be a non-empty string`);
       }
+      for (const segment of data.slug.split('/')) {
+        if (!SLUG_SEGMENT.test(segment)) {
+          throw new Error(
+            `${rel}: slug override segment ${JSON.stringify(segment)} is not in slug form ` +
+              `(lowercase letters, digits, hyphens)`
+          );
+        }
+      }
       slugs.push(data.slug);
       continue;
     }

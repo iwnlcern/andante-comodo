@@ -44,8 +44,8 @@ it — unlisted is obscurity, not access control. `unlisted` exists only on
 production builds (the post is not built at all). One authoring constraint:
 an unlisted post's URL must be derivable without guessing, so either keep its
 filename in clean slug form (lowercase letters, digits, hyphens) or set an
-explicit `slug` in the frontmatter — anything else fails the build rather than
-risk the URL leaking into the sitemap.
+explicit `slug` whose `/`-separated segments use that same slug form — anything
+else fails the build rather than risk the URL leaking into the sitemap.
 
 Example:
 ```md

@@ -20,11 +20,12 @@ still read it: unlisted is obscurity, not access control. The flag exists only
 on `blog` and defaults to `false`.
 
 If a post is both `draft` and `unlisted`, `draft` wins in production and the page
-is not built. An unlisted post without an explicit `slug` must use clean slug
-form for every filename/path segment: lowercase letters, digits, and hyphens.
-Otherwise, set `slug` in frontmatter. The sitemap scanner fails closed: malformed
-or ambiguous frontmatter, invalid `unlisted` values, or a URL it cannot derive
-reliably fails the build rather than risk leaking the post into the sitemap.
+is not built. An unlisted post must use clean slug form — lowercase letters,
+digits, and hyphens — for every filename/path segment, or for every `/`-separated
+segment of an explicit frontmatter `slug`. The sitemap scanner fails closed:
+malformed or ambiguous frontmatter, invalid `unlisted` values, or a URL it
+cannot derive reliably fails the build rather than risk leaking the post into
+the sitemap.
 
 ## The markdown pipeline
 
