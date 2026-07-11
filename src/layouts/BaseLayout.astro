@@ -10,21 +10,23 @@ interface Props {
   image?: string;
   wide?: boolean;
   post?: boolean;
+  noindex?: boolean;
   datePublished?: Date;
   dateModified?: Date;
 }
 
-const { title, description, image, wide = false, post = false, datePublished, dateModified } = Astro.props;
+const { title, description, image, wide = false, post = false, noindex = false, datePublished, dateModified } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en" class={post ? 'no-scrollbar' : undefined}>
   <head>
     <BaseHead title={title} description={description} image={image} post={post} datePublished={datePublished} dateModified={dateModified} />
+    {noindex && <meta name="robots" content="noindex" />}
   </head>
   <body class="flex flex-col min-h-screen">
     <Header />
-    <main data-pagefind-body class={`flex-1 w-full mx-auto px-6 py-12 ${wide ? 'max-w-[96rem]' : post ? 'max-w-[calc(var(--measure)_+_3rem)]' : 'max-w-5xl'}`}>
+    <main data-pagefind-body={noindex ? undefined : ''} class={`flex-1 w-full mx-auto px-6 py-12 ${wide ? 'max-w-[96rem]' : post ? 'max-w-[calc(var(--measure)_+_3rem)]' : 'max-w-5xl'}`}>
       <slot />
     </main>
     <Footer />

@@ -28,6 +28,7 @@ const effectiveUpdated = resolveUpdated(post.data.date, post.data.updated ?? nul
   readingMinutes={minutes}
   epistemic={post.data.epistemic}
   ai={post.data.ai}
+  noindex={post.data.unlisted}
 >
   <Content />
 </PostLayout>

@@ -29,6 +29,7 @@ interface Props {
   readingMinutes?: number;
   epistemic?: string;
   ai?: AiMeta;
+  noindex?: boolean;
   datePublished?: Date;
   dateModified?: Date;
 }
@@ -47,6 +48,7 @@ const {
   readingMinutes,
   epistemic,
   ai,
+  noindex = false,
   datePublished,
   dateModified,
 } = Astro.props;
@@ -59,6 +61,7 @@ const {
   backLabel={backLabel}
   readingApparatus
   headings={headings}
+  noindex={noindex}
   datePublished={datePublished}
   dateModified={dateModified}
 >

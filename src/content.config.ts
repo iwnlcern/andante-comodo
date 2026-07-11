@@ -23,6 +23,7 @@ const blog = defineCollection({
     category: z.enum(['technical', 'slice-of-life', 'rants']),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    unlisted: z.boolean().default(false),
     epistemic: epistemicField,
     ai: aiField,
   }),

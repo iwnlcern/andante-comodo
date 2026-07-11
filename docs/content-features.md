@@ -6,6 +6,26 @@ title: "Content Features"
 
 Rich prose renders on all content collections. Frontmatter and collection shapes live in [Content Types](./README.md); aside Type x Tier semantics live in [Admonition & Aside Authoring Schema](./admonition-schema.md); prose theming, font, measure, and token controls live in [Theming](./theming.md).
 
+## Blog visibility
+
+### Unlisted Posts
+
+Source: schema `src/content.config.ts:26`; listing predicate `src/lib/content/listable.mjs:1-7`; sitemap scanner `src/lib/content/unlisted-slugs.mjs:1-86`; page metadata `src/pages/blog/[...slug].astro:18-31`.
+
+Set `unlisted: true` on a blog post to build it at its normal URL while excluding
+it from the homepage, blog index, tag pages, both RSS feeds and newsletter
+automation, the sitemap, and the on-site search index. Its tags mint no tag
+routes, and the page carries a `noindex` robots meta tag. Anyone with the URL can
+still read it: unlisted is obscurity, not access control. The flag exists only
+on `blog` and defaults to `false`.
+
+If a post is both `draft` and `unlisted`, `draft` wins in production and the page
+is not built. An unlisted post without an explicit `slug` must use clean slug
+form for every filename/path segment: lowercase letters, digits, and hyphens.
+Otherwise, set `slug` in frontmatter. The sitemap scanner fails closed: malformed
+or ambiguous frontmatter, invalid `unlisted` values, or a URL it cannot derive
+reliably fails the build rather than risk leaking the post into the sitemap.
+
 ## The markdown pipeline
 
 Astro wires the pipeline in `astro.config.mjs:53-67`: remark runs `remarkMultilineBlockquote` and `remarkMath`, then rehype runs table quotes, figures, figure credits, directives, admonitions, heading anchors, collapsibles, Mermaid, KaTeX, and sidenotes. The exports are centralized in `src/lib/rehype-plugins.mjs:1-11`.

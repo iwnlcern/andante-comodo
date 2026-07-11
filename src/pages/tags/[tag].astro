@@ -12,13 +12,14 @@ import {
   requiredCollection,
 } from '#lib/content/collection-items';
 import { enabledCollections } from '#lib/content/collection-registry.mjs';
+import { listable } from '#lib/content/listable.mjs';
 import type { IndexSection } from '#lib/content/collection-index';
 
 export async function getStaticPaths() {
   // Aggregates blog/projects/garden/reading. `works` is intentionally omitted: no tags in schema.
   const enabledIds = new Set(enabledCollections().map((collection) => collection.id));
   const [allBlog, allProjects, allGarden, allReading] = await Promise.all([
-    getCollection('blog', ({ data }) => !data.draft),
+    getCollection('blog', listable),
     getCollection('projects'),
     getCollection('garden'),
     getCollection('reading'),

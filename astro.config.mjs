@@ -8,6 +8,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { site } from './src/config/site.mjs';
 import { siteHost } from './src/lib/config/site.mjs';
+import { unlistedBlogSlugs } from './src/lib/content/unlisted-slugs.mjs';
 import {
   remarkMultilineBlockquote,
   rehypeFigures,
@@ -20,6 +21,15 @@ import {
   rehypeMermaid,
   rehypeSidenotes,
 } from './src/lib/rehype-plugins.mjs';
+
+// Unlisted posts build normally but must not be advertised: the scanner
+// (fail-closed; see unlisted-slugs.mjs) feeds the sitemap filter. Comparison
+// is trailing-slash-insensitive so a trailingSlash config change cannot
+// silently re-leak URLs. The filter receives full absolute page URLs.
+const stripTrailingSlash = (url) => url.replace(/\/+$/, '');
+const unlistedUrls = new Set(
+  unlistedBlogSlugs().map((slug) => stripTrailingSlash(new URL(`/blog/${slug}/`, site.url).href))
+);
 
 /** Replace the external-link host sentinel before and after CSS bundling. */
 function siteHostCssPlugin() {
@@ -46,7 +56,11 @@ function siteHostCssPlugin() {
 
 export default defineConfig({
   site: site.url,
-  integrations: [mdx(), sitemap(), tailwind()],
+  integrations: [
+    mdx(),
+    sitemap({ filter: (page) => !unlistedUrls.has(stripTrailingSlash(page)) }),
+    tailwind(),
+  ],
   adapter: cloudflare(),
   output: 'static',
   vite: { plugins: [siteHostCssPlugin()] },
