@@ -15,13 +15,25 @@ function contentFiles(dir, prefix = '') {
   const out = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
-    if (entry.isDirectory()) {
+    if (entry.isSymbolicLink()) {
+      throw new Error(`${rel}: symbolic links are not allowed in scanned blog content`);
+    } else if (entry.isDirectory()) {
       out.push(...contentFiles(join(dir, entry.name), rel));
     } else if (CONTENT_EXTENSIONS.some((ext) => entry.name.endsWith(ext))) {
       out.push(rel);
     }
   }
   return out;
+}
+
+/** Canonical built route for an Astro catch-all blog parameter. */
+export function blogRouteFromEntryId(entryId) {
+  const param = entryId.replace(/^\/|\/$/g, '');
+  if (param === '') {
+    throw new Error(`${JSON.stringify(entryId)} produces an empty catch-all route parameter`);
+  }
+  const sanitized = param.normalize().replace(/#/g, '%23').replace(/\?/g, '%3F');
+  return `/blog/${sanitized}/`;
 }
 
 function frontmatterOf(raw, file) {
@@ -69,7 +81,7 @@ export function unlistedBlogSlugs(dir = 'src/content/blog') {
       continue;
     }
 
-    const id = rel.replace(/\.(md|mdx)$/, '');
+    const id = rel.replace(/\.(md|mdx)$/, '').replace(/\/index$/, '');
     for (const segment of id.split('/')) {
       if (!SLUG_SEGMENT.test(segment)) {
         throw new Error(
