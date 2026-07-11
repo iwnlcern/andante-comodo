@@ -61,6 +61,12 @@ When you are ready to make it yours, follow **First Files To Edit** and the
 - `src/config/collections.mjs`: collection labels, descriptions, navigation, homepage placement, feed inclusion, and taxonomy labels.
 - `src/data/resume.ts`: all resume sections rendered at `/resume`.
 - `src/content/`: posts, notes, projects, works, reading entries, and pages. To add a blog post, create a `.md` or `.mdx` file under `src/content/blog/` — the URL slug comes from the filename. While drafting, set `draft: true` to keep a post out of every listing and both feeds; remove it (or set `draft: false`) to publish.
+
+  Set `unlisted: true` instead to publish link-only: the page builds at its
+  normal URL but stays out of every listing, tag page, feed, the sitemap, and
+  on-site search, and carries a `noindex` robots meta — obscurity, not access
+  control. Keep unlisted filenames in slug form, or set a slug-form `slug:`
+  override (details in `docs/README.md`).
 - `public/`: portrait, Open Graph image, favicon, audio, score files, and any other static media.
 
 Keep `src/config/site.mjs` and `src/config/collections.mjs` key names stable. The template's pages and feeds read those keys directly.
