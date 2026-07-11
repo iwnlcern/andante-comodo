@@ -3,13 +3,14 @@ import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
 import { site } from '#config/site.mjs';
 import { feedCollections } from '#lib/content/collection-registry.mjs';
+import { listable } from '#lib/content/listable.mjs';
 
 // The registry controls which collections appear and in what order. Item shape
 // stays bespoke per collection, and links derive from each canonical slug.
 async function itemsForCollection(entry: { id: string; slug: string }) {
   switch (entry.id) {
     case 'blog': {
-      const blog = await getCollection('blog', ({ data }) => !data.draft);
+      const blog = await getCollection('blog', listable);
       return blog.map((post) => ({
         title: post.data.title,
         pubDate: post.data.date,

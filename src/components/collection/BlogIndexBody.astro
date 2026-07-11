@@ -4,6 +4,7 @@ import CollectionIndex from '#components/collection/CollectionIndex.astro';
 import NewsletterSignup from '#components/newsletter/NewsletterSignup.astro';
 import { blogItem, byDate, dropEmptySections } from '#lib/content/collection-items';
 import { taxonomyLabel } from '#lib/content/collection-registry.mjs';
+import { listable } from '#lib/content/listable.mjs';
 import type { IndexSection } from '#lib/content/collection-index';
 
 interface Props {
@@ -15,7 +16,7 @@ interface Props {
 
 const { entry } = Astro.props;
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(byDate);
+const posts = (await getCollection('blog', listable)).sort(byDate);
 const categories = ['technical', 'slice-of-life', 'rants'] as const;
 
 const sections: IndexSection[] = dropEmptySections(

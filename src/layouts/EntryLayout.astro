@@ -18,6 +18,7 @@ interface Props {
   backHref?: string;
   backLabel?: string;
   post?: boolean;
+  noindex?: boolean;
   image?: string;
   readingApparatus?: boolean;
   headings?: Heading[];
@@ -32,6 +33,7 @@ const {
   backHref,
   backLabel,
   post = false,
+  noindex = false,
   image,
   readingApparatus = false,
   headings = [],
@@ -40,7 +42,7 @@ const {
 } = Astro.props;
 ---
 
-<BaseLayout title={title} description={description} image={image} wide={width === 'full'} post={post || readingApparatus} datePublished={datePublished} dateModified={dateModified}>
+<BaseLayout title={title} description={description} image={image} wide={width === 'full'} post={post || readingApparatus} noindex={noindex} datePublished={datePublished} dateModified={dateModified}>
   {readingApparatus && <div class="rt-progress" id="rtProgress" aria-hidden="true"></div>}
   <article class={width === 'full' ? 'w-full' : 'relative mx-auto w-full max-w-[var(--measure)]'}>
     <header class="mb-8">

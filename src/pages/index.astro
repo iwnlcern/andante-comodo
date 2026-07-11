@@ -7,6 +7,7 @@ import Card from '#components/collection/Card.astro';
 import { blogItem, bookItem, byRating, requiredCollection } from '#lib/content/collection-items';
 import { recent, recentWorks } from '#lib/content/collection-index';
 import { accentVar, homeCollections } from '#lib/content/collection-registry.mjs';
+import { listable } from '#lib/content/listable.mjs';
 import { site } from '#config/site.mjs';
 import { obfuscateEmail } from '#lib/contact-obfuscation.mjs';
 
@@ -14,7 +15,7 @@ const homeEntries = homeCollections();
 const contactEmail = obfuscateEmail(site.email); // obfuscated in static HTML; a client script reassembles the mailto:
 const limitFor = (entry) => entry.home.limit ?? Number.POSITIVE_INFINITY;
 
-const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const allPosts = await getCollection('blog', listable);
 const allProjects = await getCollection('projects');
 const allGarden = await getCollection('garden');
 const allReading = await getCollection('reading');

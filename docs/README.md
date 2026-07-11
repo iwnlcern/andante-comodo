@@ -21,6 +21,7 @@ Required frontmatter:
 Optional frontmatter:
 - `tags` (string[])
 - `draft` (boolean)
+- `unlisted` (boolean)
 - `updated` (optional date) — manual override for the "Updated" date shown on a post. When omitted, the last git commit date for the file is used (best-effort; see below). Shown only when later than `date`.
 - `epistemic` (optional string) — a one-line epistemic-status / assumed-audience note, rendered as a prominent italic line at the top of the post.
 - `ai` (optional object) — AI-involvement disclosure: `level` (integer `0`–`5` on the colophon rubric; see `#how-i-use-ai`), optional `tools` (string[]) and `note` (string). Rendered as a 0–5 signal-strength indicator on the post's metadata line (hover for the exact level and rubric name; links to the colophon rubric). `level: 0` shows empty bars; absent → nothing.
@@ -33,6 +34,19 @@ in all builds. (`draft` exists only on `blog` and defaults to `false`.) A test-o
 `INCLUDE_DRAFTS` build flag can surface drafts in non-production builds; production
 builds always hide them.
 
+Set `unlisted: true` on a blog post to build it at its normal URL while keeping
+it out of every enumeration: the homepage, blog index, tag pages (its tags mint
+no tag routes), both RSS feeds (so it never reaches newsletter automation), the
+sitemap, and the on-site search index. The page also carries a `noindex` robots
+meta tag. Unlike `draft`, the post IS built and anyone with the link can read
+it — unlisted is obscurity, not access control. `unlisted` exists only on
+`blog` and defaults to `false`. If both flags are set, `draft` wins in
+production builds (the post is not built at all). One authoring constraint:
+an unlisted post's URL must be derivable without guessing, so either keep its
+filename in clean slug form (lowercase letters, digits, hyphens) or set an
+explicit `slug` whose `/`-separated segments use that same slug form — anything
+else fails the build rather than risk the URL leaking into the sitemap.
+
 Example:
 ```md
 ---
@@ -42,6 +56,7 @@ date: 2026-02-04
 category: technical
 tags: ["meta", "announcement"]
 draft: false
+unlisted: false
 ---
 ```
 
