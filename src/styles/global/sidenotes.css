@@ -1,4 +1,7 @@
 .post-prose .sidenote {
+  /* Sidenotes are emitted with [hidden] (sidenotes.mjs) so reader modes discard the clone;
+     these author display rules override the attribute's UA default in every state, so the
+     attribute never affects on-site rendering. Don't "simplify" by relying on [hidden] here. */
   display: none;
   /* a sidenote floats in the margin; never inherit italics from an italic blockquote it's anchored in */
   font-style: normal;

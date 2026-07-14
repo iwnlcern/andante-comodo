@@ -72,7 +72,16 @@ export function rehypeSidenotes() {
     if (!notes.size) return;
 
     let counter = 0;
-    const walk = (node) => {
+    // Sidenotes bubble up out of phrasing content and land as block-level siblings AFTER the
+    // block that holds their ref (they're absolutely positioned, so on-site geometry is
+    // unchanged). Inline placement corrupted reader modes: extractors that keep visible nodes
+    // (Chrome's reading mode) rendered the clone mid-sentence right after the superscript.
+    const PHRASING = new Set([
+      'a', 'abbr', 'b', 'bdi', 'bdo', 'br', 'cite', 'code', 'data', 'del', 'dfn', 'em', 'i',
+      'ins', 'kbd', 'mark', 'q', 'ruby', 's', 'samp', 'small', 'span', 'strong', 'sub', 'sup',
+      'time', 'u', 'var', 'wbr',
+    ]);
+    const walk = (node, carry) => {
       if (!node.children) return;
       const next = [];
 
@@ -138,21 +147,29 @@ export function rehypeSidenotes() {
                 children: [chevronSvg()],
               });
             }
-            next.push({
+            carry.push({
               type: 'element',
-              tagName: 'span',
-              properties: { className, dataSidenoteFor: targetId },
+              // <aside> + [hidden]: extractors drop asides outright (Readability) or classify
+              // them as boilerplate, and [hidden] catches the rest; on the site itself
+              // sidenotes.css sets display explicitly in every state, which overrides both.
+              // role="note": dozens of asides would otherwise each be a complementary landmark.
+              tagName: 'aside',
+              properties: { className, dataSidenoteFor: targetId, hidden: true, role: 'note' },
               children,
             });
             counter += 1;
           }
+        } else if (child.type === 'element' && PHRASING.has(child.tagName)) {
+          walk(child, carry);
         } else {
-          walk(child);
+          const local = [];
+          walk(child, local);
+          next.push(...local);
         }
       }
 
       node.children = next;
     };
-    walk(tree);
+    walk(tree, []);
   };
 }

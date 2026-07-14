@@ -48,6 +48,8 @@
 
 .post-prose .hash {
   margin-left: 0.4rem;
+  /* The anchor is emitted empty (ast.mjs hashGlyph); pseudo-element content is invisible to
+     reader-mode extractors and copy/paste, unlike the text node this used to be. */
   font-family: var(--font-serif);
   font-weight: 400;
   color: rgb(var(--color-text-secondary));
@@ -58,6 +60,10 @@
   text-decoration: none;
   text-shadow: none;
   filter: none;
+}
+
+.post-prose .hash::after {
+  content: '#';
 }
 
 .post-prose :is(h2, h3, h4):hover .hash,

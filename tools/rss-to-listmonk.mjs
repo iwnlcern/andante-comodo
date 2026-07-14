@@ -176,9 +176,17 @@ export function selectBlogItem(items, prefix = POST_PREFIX) {
   return items.find((item) => isBlogItem(item, prefix)) ?? null;
 }
 
+export function formatPubDate(pubDate) {
+  const parsed = new Date(pubDate);
+  if (Number.isNaN(parsed.getTime())) return pubDate;
+  // Feed pubDates carry no real time-of-day (frontmatter dates render as
+  // midnight GMT), so emit the date portion only: "Fri, 10 Jul 2026".
+  return parsed.toUTCString().slice(0, 16);
+}
+
 export function buildCampaignBody(item) {
   const dateRow = item.pubDate
-    ? `<p style="margin:0 0 10px 0; color:#a1a1a1; font-size:12px;">${escapeHtml(item.pubDate)}</p>`
+    ? `<p style="margin:0 0 10px 0; color:#a1a1a1; font-size:12px;">${escapeHtml(formatPubDate(item.pubDate))}</p>`
     : '';
   const safeTitle = escapeHtml(item.title || 'New post');
   const href = safeHref(item.link);
@@ -189,15 +197,15 @@ export function buildCampaignBody(item) {
   return `
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0f0f0f; border:1px solid #262626; border-radius:12px;">
   <tr>
-    <td style="padding:20px; font-family:Inter, -apple-system, Segoe UI, Roboto, Arial, sans-serif;">
+    <td style="padding:20px; font-family:'EB Garamond', 'Iowan Old Style', Georgia, serif;">
       ${dateRow}
-      <h2 style="margin:0 0 12px 0; color:#fafafa; font-size:24px; line-height:30px; font-weight:700;">
+      <h2 style="margin:0 0 12px 0; color:#fafafa; font-family:'Bodoni Std', 'Bodoni 72', Didot, Georgia, serif; font-size:26px; line-height:32px; font-weight:400;">
         ${safeTitle}
       </h2>
-      <div style="margin:0 0 18px 0; color:#a1a1a1; font-size:16px; line-height:24px;">
+      <div style="margin:0 0 18px 0; color:#a1a1a1; font-size:17px; line-height:25px;">
         ${safeDescription}
       </div>
-      <a href="${href}" target="_blank" style="display:inline-block; padding:12px 18px; border-radius:8px; background:#ffffff; color:#0a0a0a; text-decoration:none; font-size:14px; font-weight:600; border:1px solid #e5e5e5;">
+      <a href="${href}" target="_blank" style="display:inline-block; padding:12px 18px; border-radius:8px; background:#ffffff; color:#0a0a0a; text-decoration:none; font-size:15px; font-weight:600; border:1px solid #e5e5e5;">
         Read the post
       </a>
     </td>

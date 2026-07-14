@@ -16,7 +16,9 @@ export const hashGlyph = (id) => ({
   type: 'element',
   tagName: 'a',
   properties: { className: ['hash'], href: `#${id}`, ariaHidden: 'true', tabIndex: -1 },
-  children: [{ type: 'text', value: '#' }],
+  // Empty on purpose: the # is drawn by CSS ::after (prose-code-anchors.css) so reader-mode
+  // extraction and copy/paste never pick up a stray "#" at the end of headings/captions.
+  children: [],
 });
 
 export const slugBase = (value) =>
