@@ -1,7 +1,8 @@
 ---
 import { site } from '#config/site.mjs';
-import { aiLevelName, aiLevelDescription } from '#lib/content/post-meta.mjs';
+import { aiLevelName, aiLevelDescription, aiSignalLabel } from '#lib/content/post-meta.mjs';
 import MetaPopover from '#components/common/MetaPopover.astro';
+import { withTrailingSlash } from '#lib/internal-href.mjs';
 
 interface AiMeta {
   level: number;
@@ -17,11 +18,14 @@ const { ai } = Astro.props;
 const level = ai.level;
 const name = aiLevelName(level);
 const description = aiLevelDescription(level);
-// Full text for assistive tech lives on the trigger; the styled card mirrors it
-// visually (see MetaPopover). Native `title` is intentionally dropped.
-const label = `AI involvement: ${level}/5 — ${name}. ${description}`;
+// Full text for assistive tech lives on the trigger; the decorative card breaks
+// the same information into visual lines. Native `title` is intentionally dropped.
+const summary = aiSignalLabel(ai) ?? `AI involvement: ${level}/5 — ${name}`;
+const label = `${summary}. ${description}`;
+const details = [ai.tools?.length ? `Tools: ${ai.tools.join(', ')}` : undefined, ai.note].filter(Boolean);
 const bars = [1, 2, 3, 4, 5];
-const href = (site.meta as { aiPolicyHref?: string }).aiPolicyHref;
+const rawHref = (site.meta as { aiPolicyHref?: string }).aiPolicyHref;
+const href = rawHref ? withTrailingSlash(rawHref) : undefined;
 // Link to the AI-policy rubric when the identity config provides one; degrade to
 // a non-interactive indicator (bars + popover only) for the template case.
 const Wrapper = href ? 'a' : 'span';
@@ -39,6 +43,7 @@ const Wrapper = href ? 'a' : 'span';
   <span class="ai-pop-level">AI involvement · {level}/5</span>
   <span class="ai-pop-name">{name}</span>
   <span class="ai-pop-desc">{description}</span>
+  {details.map((detail) => <span class="ai-pop-extra">{detail}</span>)}
 </MetaPopover>
 
 <style>
@@ -99,5 +104,11 @@ const Wrapper = href ? 'a' : 'span';
     display: block;
     margin-top: 0.2rem;
     color: rgb(var(--color-text-secondary));
+  }
+
+  .ai-pop-extra {
+    display: block;
+    margin-top: 0.2rem;
+    color: rgb(var(--color-text-primary));
   }
 </style>

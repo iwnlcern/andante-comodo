@@ -132,7 +132,7 @@ To replace a font (e.g. swap the display face), edit these four places:
 1. **`src/styles/global/tokens.css`** — point the `--font-*` role at the new
    family name (keep a sensible fallback stack).
 2. **`src/styles/global/fonts.css`** — add/replace the `@font-face` block(s) for
-   the new family (the site self-hosts woff2/ttf under `public/fonts/`; add the
+   the new family (the site self-hosts browser-delivered woff2 under `public/fonts/`; add the
    file there too).
 3. **`src/components/common/BaseHead.astro`** — update the `<link rel="preload">`
    tags if the new face is one of the two critical above-the-fold faces
@@ -143,6 +143,8 @@ To replace a font (e.g. swap the display face), edit these four places:
 > **Display-font file provenance.** The display font is brand/identity and
 > licensed per repo: this template ships an open-licensed display face (libre Bodoni Moda) at
 > `public/fonts/BodoniStd-Roman.woff2` — the filename is retained for compatibility.
+> The separate Bodoni Moda SC TTF under `source-assets/fonts/` is a build-only
+> input for generated Open Graph cards and is not browser-delivered.
 > Treat the display font as yours to choose: supply your own `woff2`, point
 > `--font-display` at it, and update the `@font-face` and preload as above.
 

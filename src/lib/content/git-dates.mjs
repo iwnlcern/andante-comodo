@@ -55,8 +55,32 @@ function defaultRun() {
   });
 }
 
-function loadMap(run = defaultRun) {
+// A shallow clone (depth-1 CI checkout, e.g. Cloudflare Pages) attributes every
+// content file to the boundary commit, so "last modified" would collapse to the
+// clone time — fresh-looking but false. Missing git falls through to the run()
+// catch below, so errors here mean "not shallow".
+function defaultIsShallow() {
+  try {
+    return (
+      execFileSync('git', ['rev-parse', '--is-shallow-repository'], {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+      }).trim() === 'true'
+    );
+  } catch {
+    return false;
+  }
+}
+
+function loadMap(run = defaultRun, isShallow = defaultIsShallow) {
   if (cached !== undefined) return cached;
+  if (isShallow()) {
+    console.warn(
+      '[git-dates] shallow git clone; auto "Updated" dates disabled to avoid false modification times (manual `updated:` still works)',
+    );
+    cached = null;
+    return cached;
+  }
   try {
     const stdout = run();
     const map = parseGitLog(stdout);
@@ -82,8 +106,9 @@ export function __resetCache() {
  * unavailable.
  * @param {{ filePath?: string, id?: string }} entry
  * @param {() => string} run
+ * @param {() => boolean} isShallow
  * @returns {Date | null}
  */
-export function gitLastModified(entry, run = defaultRun) {
-  return lookupDate(loadMap(run), entry);
+export function gitLastModified(entry, run = defaultRun, isShallow = defaultIsShallow) {
+  return lookupDate(loadMap(run, isShallow), entry);
 }

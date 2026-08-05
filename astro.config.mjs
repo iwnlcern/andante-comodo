@@ -68,7 +68,12 @@ export default defineConfig({
   ],
   adapter: cloudflare(),
   output: 'static',
-  vite: { plugins: [siteHostCssPlugin()] },
+  vite: {
+    plugins: [siteHostCssPlugin()],
+    // OG cards are prerendered in Node. Keep resvg's platform-native binary
+    // external so Vite does not try to parse the .node file as JavaScript.
+    ssr: { external: ['@resvg/resvg-js'] },
+  },
   markdown: {
     syntaxHighlight: { type: 'shiki', excludeLangs: ['mermaid'] },
     remarkPlugins: [remarkMultilineBlockquote, remarkMath],

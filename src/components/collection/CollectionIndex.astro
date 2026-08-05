@@ -12,11 +12,12 @@ const {
   emptyText = 'Nothing here yet. Check back soon!',
   filterable = false,
   filterScope,
+  noindex = false,
 } = Astro.props;
 const visible = sections.filter((section) => section.items.length > 0);
 ---
 
-<BaseLayout title={title} description={description ?? title}>
+<BaseLayout title={title} description={description ?? title} noindex={noindex}>
   <h1 class="mb-2 text-3xl font-normal font-display">{title}</h1>
   {description ? (
     <p class="mb-8 text-lg text-text-secondary">{description}</p>

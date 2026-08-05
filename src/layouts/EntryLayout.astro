@@ -4,6 +4,7 @@ import BaseLayout from './BaseLayout.astro';
 import RichProseTools from '#components/post/RichProseTools.astro';
 import TableOfContents from '#components/post/TableOfContents.astro';
 import SectionLens from '#components/post/SectionLens.astro';
+import { withTrailingSlash } from '#lib/internal-href.mjs';
 
 interface Heading {
   depth: number;
@@ -47,7 +48,7 @@ const {
   <article class={width === 'full' ? 'w-full' : 'relative mx-auto w-full max-w-[var(--measure)]'}>
     <header class="mb-8">
       {backHref && (
-        <a href={backHref} class="text-sm text-text-secondary hover:text-accent mb-4 inline-block">
+        <a href={withTrailingSlash(backHref)} class="text-sm text-text-secondary hover:text-accent mb-4 inline-block">
           &larr; {backLabel}
         </a>
       )}
@@ -56,7 +57,7 @@ const {
     </header>
     {readingApparatus && (
       <Fragment>
-        <TableOfContents headings={headings} variant="mobile" />
+        <TableOfContents headings={headings} />
         <nav class="top-toc" data-top-toc><h3>Contents</h3><ul class="toc-list" data-toc></ul></nav>
       </Fragment>
     )}

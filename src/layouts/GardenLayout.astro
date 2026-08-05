@@ -2,6 +2,7 @@
 import EntryLayout from './EntryLayout.astro';
 import Tag from '#components/common/Tag.astro';
 import { taxonomyLabel } from '#lib/content/collection-registry.mjs';
+import { tagHref } from '#lib/content/tag-slugs.mjs';
 
 interface Props {
   title: string;
@@ -42,7 +43,7 @@ const formattedDate = date.toLocaleDateString('en-US', {
       <time datetime={date.toISOString()}>{formattedDate}</time>
       {tags.length > 0 && <span>·</span>}
       {tags.map((tag) => (
-        <Tag tag={tag} href={`/tags/${tag}`} />
+        <Tag tag={tag} href={tagHref(tag)} />
       ))}
     </div>
   </div>

@@ -9,6 +9,9 @@
   const initMermaid = async () => {
     if (typeof window.__mermaidCleanup === 'function') window.__mermaidCleanup();
     const gen = (window.__mermaidGen = (window.__mermaidGen ?? 0) + 1);
+    let cancelled = false;
+    let approachObserver;
+    let themeObserver;
 
     const nodes = Array.from(document.querySelectorAll('.mermaid'));
     if (!nodes.length) return;
@@ -16,6 +19,29 @@
     nodes.forEach((el) => {
       if (!el.dataset.mermaidSrc) el.dataset.mermaidSrc = el.textContent.trim();
     });
+
+    window.__mermaidCleanup = () => {
+      cancelled = true;
+      approachObserver?.disconnect();
+      themeObserver?.disconnect();
+      delete document.documentElement.dataset.mermaidActive;
+      delete window.__mermaidCleanup;
+    };
+
+    if ('IntersectionObserver' in window) {
+      await new Promise((resolve) => {
+        approachObserver = new IntersectionObserver(
+          (entries) => {
+            if (!entries.some((entry) => entry.isIntersecting)) return;
+            approachObserver.disconnect();
+            resolve();
+          },
+          { rootMargin: '800px 0px' },
+        );
+        nodes.forEach((node) => approachObserver.observe(node));
+      });
+    }
+    if (cancelled || gen !== window.__mermaidGen) return;
 
     let mermaid;
     try {
@@ -51,16 +77,10 @@
     await render();
     if (gen !== window.__mermaidGen) return;
 
-    const observer = new MutationObserver((mutations) => {
+    themeObserver = new MutationObserver((mutations) => {
       if (mutations.some((mutation) => mutation.attributeName === 'data-theme')) render();
     });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-
-    window.__mermaidCleanup = () => {
-      observer.disconnect();
-      delete document.documentElement.dataset.mermaidActive;
-      delete window.__mermaidCleanup;
-    };
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   };
 
   if (!window.__mermaidBound) {

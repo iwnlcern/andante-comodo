@@ -20,8 +20,8 @@ const { title, subtitle, link, location, dates, gpa, bullets = [] } = Astro.prop
     </div>
     <div class="text-sm text-text-secondary sm:text-right">
       {location && <div>{location}</div>}
-      {dates && <div>{dates}</div>}
       {gpa && <div>{gpa}</div>}
+      {dates && <div>{dates}</div>}
     </div>
   </div>
   {bullets.length > 0 && (

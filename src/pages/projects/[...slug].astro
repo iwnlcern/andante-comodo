@@ -3,6 +3,7 @@ import { render } from 'astro:content';
 import EntryLayout from '#layouts/EntryLayout.astro';
 import Tag from '#components/common/Tag.astro';
 import { collectionPaths } from '#lib/content/collection-paths';
+import { tagHref } from '#lib/content/tag-slugs.mjs';
 
 export const getStaticPaths = () => collectionPaths('projects', { propKey: 'project' });
 
@@ -22,7 +23,7 @@ const formattedDate = project.data.date.toLocaleDateString('en-US', {
     <div class="flex flex-wrap items-center gap-3 mb-4">
       <span class="text-sm text-text-secondary">{formattedDate}</span>
       {project.data.tags.map((tag) => (
-        <Tag tag={tag} href={`/tags/${tag}`} />
+        <Tag tag={tag} href={tagHref(tag)} />
       ))}
     </div>
     <div class="flex gap-4">

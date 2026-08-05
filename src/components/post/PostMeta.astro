@@ -3,6 +3,7 @@ import Tag from '#components/common/Tag.astro';
 import AiSignal from '#components/post/AiSignal.astro';
 import MetaPopover from '#components/common/MetaPopover.astro';
 import { formatMetaDate } from '#lib/content/post-meta.mjs';
+import { tagHref } from '#lib/content/tag-slugs.mjs';
 
 interface AiMeta {
   level: number;
@@ -54,6 +55,6 @@ const readingWords = typeof wordCount === 'number' ? `${wordCount.toLocaleString
   )}
   {tags.length > 0 && <span>·</span>}
   {tags.map((tag) => (
-    <Tag tag={tag} href={`/tags/${tag}`} />
+    <Tag tag={tag} href={tagHref(tag)} />
   ))}
 </div>

@@ -14,6 +14,7 @@ const stars = Array.from({ length: 5 }, (_, index) => {
 
 <span
   class={`stars ${isExtraordinary ? 'stars--extraordinary' : ''}`}
+  role="img"
   aria-label={isExtraordinary ? '6 out of 5' : `${value} out of 5`}
 >
   <span class="stars__row" aria-hidden="true">

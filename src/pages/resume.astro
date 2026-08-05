@@ -17,8 +17,15 @@ const githubLabel = site.social.github.replace(/^https?:\/\//, '').replace(/\/$/
 const linkedinLabel = site.social.linkedin.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 ---
 
-<BaseLayout title="Resume" description={`Resume for ${profile.name}.`}>
+<BaseLayout title="Resume" description={`Resume for ${profile.name}.`} bodyClass="resume-page">
   <article class="resume-base max-w-4xl mx-auto font-dense">
+    <div class="resume-print-control mb-5 flex justify-end">
+      <button
+        type="button"
+        data-print-page
+        class="inline-flex items-center rounded border border-border px-3 py-2 text-sm text-text-secondary transition-colors hover:border-text-secondary hover:text-text-primary"
+      >Print / Save PDF</button>
+    </div>
     <header class="border-b border-border pb-6 mb-8">
       <h1 class="text-4xl font-bold font-dense">{profile.name}</h1>
       <p class="text-text-secondary mt-2">{profile.location}</p>
@@ -40,27 +47,12 @@ const linkedinLabel = site.social.linkedin.replace(/^https?:\/\/(www\.)?/, '').r
     <section class="mb-10">
       <h2 class="text-xl font-semibold mb-4 font-dense">Education</h2>
       <div class="space-y-3">
-        <div class="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
-          <div>
-            <h3 class="font-semibold font-dense">{education.school}</h3>
-            <p class="text-text-secondary">
-              {education.degree}
-            </p>
-          </div>
-          <div class="text-sm text-text-secondary sm:text-right">
-            <div>{education.dates}</div>
-            <div>{education.gpa}</div>
-          </div>
-        </div>
-        <ul class="list-disc pl-5 text-sm text-text-secondary space-y-1">
-          {education.coursework.map((item) => (
-            <li>
-              <span class="font-semibold text-text-primary">{item.label}:</span>
-              {' '}
-              {item.text}
-            </li>
-          ))}
-        </ul>
+        <ResumeEntry
+          title={`${education.school} — ${education.degree}`}
+          gpa={education.gpa}
+          dates={education.dates}
+          bullets={education.coursework.map((item) => ({ label: `${item.label}:`, text: item.text }))}
+        />
       </div>
     </section>
 
@@ -123,3 +115,72 @@ const linkedinLabel = site.social.linkedin.replace(/^https?:\/\/(www\.)?/, '').r
     </section>
   </article>
 </BaseLayout>
+
+<script>
+  import { initPrintPage } from '#scripts/print-page.ts';
+  initPrintPage();
+</script>
+
+<style is:global>
+  @media print {
+    @page {
+      size: letter;
+      margin: 0.45in 0.5in;
+    }
+
+    body.resume-page {
+      display: block;
+      background: #fff;
+      color: #111;
+      font-size: 9.5pt;
+      print-color-adjust: exact;
+    }
+
+    body.resume-page > header,
+    body.resume-page > footer,
+    body.resume-page > .skip-link,
+    body.resume-page .resume-print-control,
+    body.resume-page [data-theme-toggle] {
+      display: none !important;
+    }
+
+    body.resume-page > main {
+      width: 100%;
+      max-width: none;
+      padding: 0;
+    }
+
+    body.resume-page .resume-base {
+      max-width: none;
+    }
+
+    body.resume-page .resume-base > header {
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-color: #999;
+    }
+
+    body.resume-page .resume-base section {
+      margin-bottom: 1rem;
+    }
+
+    body.resume-page .resume-base section > h2 {
+      margin-bottom: 0.45rem;
+      color: #111;
+    }
+
+    body.resume-page .resume-base section > div > div,
+    body.resume-page .resume-base li {
+      break-inside: avoid;
+    }
+
+    body.resume-page .resume-base a,
+    body.resume-page .resume-base [class*="text-"] {
+      color: #111 !important;
+    }
+
+    body.resume-page .resume-base .ext-link::after {
+      display: none;
+    }
+  }
+</style>

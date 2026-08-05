@@ -30,6 +30,8 @@ export interface CollectionIndexProps {
   // `controls` slot above them (filter UI mounts there). Backward-compatible.
   filterable?: boolean;
   filterScope?: string;
+  // Thin pages (e.g. single-item tag archives) opt out of indexing/search.
+  noindex?: boolean;
 }
 
 type Dated = { data: { date: Date } };

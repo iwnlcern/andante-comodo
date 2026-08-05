@@ -13,9 +13,10 @@ interface Props {
   noindex?: boolean;
   datePublished?: Date;
   dateModified?: Date;
+  bodyClass?: string;
 }
 
-const { title, description, image, wide = false, post = false, noindex = false, datePublished, dateModified } = Astro.props;
+const { title, description, image, wide = false, post = false, noindex = false, datePublished, dateModified, bodyClass } = Astro.props;
 ---
 
 <!doctype html>
@@ -24,9 +25,10 @@ const { title, description, image, wide = false, post = false, noindex = false, 
     <BaseHead title={title} description={description} image={image} post={post} datePublished={datePublished} dateModified={dateModified} />
     {noindex && <meta name="robots" content="noindex" />}
   </head>
-  <body class="flex flex-col min-h-screen">
+  <body class:list={['flex flex-col min-h-screen', bodyClass]}>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <Header />
-    <main data-pagefind-body={noindex ? undefined : ''} class={`flex-1 w-full mx-auto px-6 py-12 ${wide ? 'max-w-[96rem]' : post ? 'max-w-[calc(var(--measure)_+_3rem)]' : 'max-w-5xl'}`}>
+    <main id="main-content" tabindex="-1" data-pagefind-body={noindex ? undefined : ''} class={`flex-1 w-full mx-auto px-6 py-12 ${wide ? 'max-w-[96rem]' : post ? 'max-w-[calc(var(--measure)_+_3rem)]' : 'max-w-5xl'}`}>
       <slot />
     </main>
     <Footer />
@@ -36,3 +38,29 @@ const { title, description, image, wide = false, post = false, noindex = false, 
     </script>
   </body>
 </html>
+
+<style>
+  .skip-link {
+    position: fixed;
+    inset-block-start: 0.75rem;
+    inset-inline-start: 0.75rem;
+    z-index: 100;
+    padding: 0.55rem 0.85rem;
+    border: 1px solid rgb(var(--color-accent));
+    border-radius: 0.375rem;
+    background: rgb(var(--color-background));
+    color: rgb(var(--color-text-primary));
+    transform: translateY(calc(-100% - 1rem));
+    transition: transform 120ms ease;
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skip-link {
+      transition: none;
+    }
+  }
+</style>

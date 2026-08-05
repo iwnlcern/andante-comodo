@@ -5,3 +5,12 @@
 export function listable(entry) {
   return !entry.data.draft && !entry.data.unlisted;
 }
+
+// Detail-route visibility is deliberately broader than listability: unlisted
+// posts keep their direct route, while drafts require the explicit build flag.
+export function draftVisible(
+  entry,
+  { includeDrafts = process.env.INCLUDE_DRAFTS === 'true' } = {},
+) {
+  return includeDrafts || !entry.data.draft;
+}

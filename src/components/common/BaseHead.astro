@@ -1,6 +1,7 @@
 ---
 import { THEME_STORAGE_KEY } from '#scripts/theme-key.mjs';
 import { site } from '#config/site.mjs';
+import { ogImagePath } from '#lib/og-card-path.mjs';
 
 interface Props {
   title: string;
@@ -12,37 +13,67 @@ interface Props {
 }
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const { title, description, image = site.meta.ogImage, post = false, datePublished, dateModified } = Astro.props;
+const { title, description, image: suppliedImage, post = false, datePublished, dateModified } = Astro.props;
 const siteTitle = site.name;
-const pageTitle = Astro.url.pathname === '/' ? siteTitle : `${title} — ${siteTitle}`;
+const isRoot = Astro.url.pathname === '/';
+const pageTitle = isRoot ? (site.meta.homeTitle ?? siteTitle) : `${title} — ${siteTitle}`;
+const image = suppliedImage ?? ogImagePath(Astro.url.pathname);
 const imageURL = new URL(image, Astro.site);
 const faviconVersion = '2026-02-05';
 
-// Serialize the BlogPosting JSON-LD, then HTML-escape for the raw-text <script>
-// context before set:html: an author `title` containing `</script>` (or `<`, `>`,
-// `&`, U+2028/U+2029) would otherwise break out of the element or inject markup.
+// Serialize JSON-LD, then HTML-escape for the raw-text script-element context
+// before set:html: content containing a closing script tag (or `<`, `>`, `&`,
+// U+2028/U+2029) would otherwise break out of the element or inject markup.
+// (Keep literal script tags out of comments in .astro files: Vite's dep
+// scanner regex-extracts them as real inline scripts and esbuild chokes.)
+const escapeJsonLd = (value) =>
+  JSON.stringify(value)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+
+const isGeneratedOgImage = suppliedImage === undefined;
+const ogImageAlt = pageTitle;
+
 const jsonLd = datePublished
-  ? JSON.stringify({
+  ? escapeJsonLd({
       '@context': 'https://schema.org',
       '@type': 'BlogPosting',
       headline: title,
+      description,
+      image: imageURL.toString(),
       datePublished: datePublished.toISOString(),
       ...(dateModified ? { dateModified: dateModified.toISOString() } : {}),
-      author: { '@type': 'Person', name: site.name },
+      author: { '@type': 'Person', name: site.name, url: site.url },
       url: canonicalURL.toString(),
       mainEntityOfPage: canonicalURL.toString(),
     })
-      .replace(/</g, '\\u003c')
-      .replace(/>/g, '\\u003e')
-      .replace(/&/g, '\\u0026')
-      .replace(/\u2028/g, '\\u2028')
-      .replace(/\u2029/g, '\\u2029')
+  : null;
+
+// Homepage identity schema: the lever for name-query knowledge panels.
+const identityJsonLd = isRoot
+  ? escapeJsonLd({
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'Person',
+          name: site.name,
+          url: site.url,
+          sameAs: [site.social.github, site.social.linkedin].filter(Boolean),
+        },
+        { '@type': 'WebSite', name: site.name, url: site.url },
+      ],
+    })
   : null;
 ---
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="dark light" />
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#130f0a" />
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f1ece0" />
 
 <!-- Preload the two faces every page needs (reading body + display headings) so the swap flash is minimal. -->
 <link rel="preload" href="/fonts/EBGaramond-Variable.woff2" as="font" type="font/woff2" crossorigin />
@@ -51,16 +82,17 @@ const jsonLd = datePublished
 <script is:inline define:vars={{ storageKey: THEME_STORAGE_KEY }}>
   (() => {
     const root = document.documentElement;
+    const preferredTheme = () =>
+      matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    let theme = preferredTheme();
 
     try {
       const storedTheme = localStorage.getItem(storageKey);
-      const theme = storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : 'dark';
-      root.dataset.theme = theme;
-      root.style.colorScheme = theme;
-    } catch {
-      root.dataset.theme = root.dataset.theme || 'dark';
-      root.style.colorScheme = root.dataset.theme;
-    }
+      if (storedTheme === 'light' || storedTheme === 'dark') theme = storedTheme;
+    } catch {}
+
+    root.dataset.theme = theme;
+    root.style.colorScheme = theme;
   })();
 </script>
 <link rel="icon" type="image/svg+xml" href={`/favicon.svg?v=${faviconVersion}`} sizes="any" />
@@ -74,16 +106,26 @@ const jsonLd = datePublished
 <meta name="description" content={description} />
 
 <meta property="og:type" content={datePublished ? 'article' : 'website'} />
+<meta property="og:site_name" content={site.name} />
 <meta property="og:url" content={Astro.url} />
 <meta property="og:title" content={pageTitle} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={imageURL} />
+<meta property="og:image:alt" content={ogImageAlt} />
+{
+  isGeneratedOgImage && (
+    <>
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+    </>
+  )
+}
 
-<meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:url" content={Astro.url} />
-<meta property="twitter:title" content={pageTitle} />
-<meta property="twitter:description" content={description} />
-<meta property="twitter:image" content={imageURL} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={Astro.url} />
+<meta name="twitter:title" content={pageTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageURL} />
 
 {
   datePublished && (
@@ -95,8 +137,13 @@ const jsonLd = datePublished
   )
 }
 
+{identityJsonLd && <script type="application/ld+json" set:html={identityJsonLd} />}
+
 <link rel="sitemap" href="/sitemap-index.xml" />
 <link rel="alternate" type="application/rss+xml" title="RSS" href={site.social.rss} />
+<link rel="alternate" type="application/rss+xml" title="RSS (blog only)" href="/rss-blog.xml" />
+<link rel="alternate" type="application/rss+xml" title="RSS (full content)" href="/rss-full.xml" />
+<link rel="alternate" type="application/rss+xml" title="RSS (blog only, full content)" href="/rss-blog-full.xml" />
 {
   post && (
     <script is:inline>

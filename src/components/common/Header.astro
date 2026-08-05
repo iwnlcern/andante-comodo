@@ -2,6 +2,7 @@
 import Search from '#components/search/Search.astro';
 import { navCollections, standalonePages } from '#lib/content/collection-registry.mjs';
 import { site } from '#config/site.mjs';
+import { withTrailingSlash } from '#lib/internal-href.mjs';
 
 const currentPath = Astro.url.pathname === '/' ? '/' : Astro.url.pathname.replace(/\/$/, '');
 const navItems = [...navCollections(), ...standalonePages];
@@ -35,7 +36,7 @@ const mobileLinkClass = (href) =>
     <ul class="hidden lg:flex items-center gap-1 rounded border border-border bg-surface px-2 py-1 shadow-[0_12px_32px_rgba(15,23,42,0.08)]">
       {navItems.map((item) => (
         <li>
-          <a href={item.href} class={desktopLinkClass(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}>
+          <a href={withTrailingSlash(item.href)} class={desktopLinkClass(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}>
             {item.label}
           </a>
         </li>
@@ -59,7 +60,6 @@ const mobileLinkClass = (href) =>
         class="lg:hidden inline-flex items-center justify-center rounded border border-border px-3 py-1.5 text-sm text-text-secondary hover:border-text-secondary hover:text-text-primary transition-colors"
         aria-controls="mobile-nav-panel"
         aria-expanded="false"
-        aria-label="Toggle navigation"
       >
         Menu
       </button>
@@ -69,7 +69,7 @@ const mobileLinkClass = (href) =>
     <ul class="px-6 py-3 grid gap-2">
       {navItems.map((item) => (
         <li>
-          <a href={item.href} class={mobileLinkClass(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}>
+          <a href={withTrailingSlash(item.href)} class={mobileLinkClass(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}>
             {item.label}
           </a>
         </li>

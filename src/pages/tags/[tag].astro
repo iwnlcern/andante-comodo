@@ -13,6 +13,7 @@ import {
 } from '#lib/content/collection-items';
 import { enabledCollections } from '#lib/content/collection-registry.mjs';
 import { listable } from '#lib/content/listable.mjs';
+import { tagSlug, assertNoSlugCollisions } from '#lib/content/tag-slugs.mjs';
 import type { IndexSection } from '#lib/content/collection-index';
 
 export async function getStaticPaths() {
@@ -36,8 +37,10 @@ export async function getStaticPaths() {
   garden.forEach((note) => note.data.tags.forEach((tag) => allTags.add(tag)));
   reading.forEach((entry) => entry.data.tags.forEach((tag) => allTags.add(tag)));
 
-  return Array.from(allTags).map((tag) => ({
-    params: { tag },
+  const tags = Array.from(allTags);
+  assertNoSlugCollisions(tags);
+  return tags.map((tag) => ({
+    params: { tag: tagSlug(tag) },
     props: {
       tag,
       posts: blog.filter((post) => post.data.tags.includes(tag)),
@@ -99,4 +102,5 @@ const sections: IndexSection[] = dropEmptySections([
   title={`#${tag}`}
   description={`${total} item${total !== 1 ? 's' : ''} tagged "${tag}"`}
   sections={sections}
+  noindex={total < 2}
 />

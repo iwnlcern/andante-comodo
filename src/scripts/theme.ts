@@ -9,6 +9,8 @@ declare global {
 export function initTheme(): void {
   const storageKey = THEME_STORAGE_KEY;
   const root = document.documentElement;
+  const preferredTheme = () =>
+    window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 
   const getTheme = () => {
     try {
@@ -17,7 +19,7 @@ export function initTheme(): void {
     } catch {}
 
     const activeTheme = root.dataset.theme;
-    return activeTheme === 'light' || activeTheme === 'dark' ? activeTheme : 'dark';
+    return activeTheme === 'light' || activeTheme === 'dark' ? activeTheme : preferredTheme();
   };
 
   const syncControls = (theme: string) => {

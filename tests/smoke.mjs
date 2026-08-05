@@ -68,13 +68,18 @@ test('configured demo identity renders on the homepage', () => {
 
 test('configured public asset paths resolve', () => {
   publicAssetExists(site.hero.portrait.src);
-  publicAssetExists(site.meta.ogImage);
   publicAssetExists('/favicon.svg');
   publicAssetExists('/favicon.png');
 
   for (const assetPath of workAssetPaths()) {
     publicAssetExists(assetPath);
   }
+});
+
+test('per-route Open Graph cards are generated', () => {
+  assert.equal(existsSync(path.join(dist, 'og/home.png')), true, 'generated card should be in the build output');
+  const html = readFileSync(path.join(dist, 'index.html'), 'utf8');
+  assert.match(html, /property="og:image" content="[^"]*\/og\/home\.png"/, 'homepage points at its generated card');
 });
 
 test('draft blog fixture is absent from a flagless production build', () => {

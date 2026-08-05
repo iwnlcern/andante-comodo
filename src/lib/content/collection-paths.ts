@@ -1,6 +1,7 @@
 import { getCollection } from 'astro:content';
 import type { CollectionEntry, CollectionKey } from 'astro:content';
 import { collectionById } from '#lib/content/collection-registry.mjs';
+import { draftVisible } from '#lib/content/listable.mjs';
 
 type PathOpts<K extends CollectionKey> = {
   /** Prop key the detail route destructures (e.g. 'post', 'note', 'work', 'book', 'project'). */
@@ -17,7 +18,7 @@ export async function collectionPaths<K extends CollectionKey>(name: K, opts: Pa
 
   const includeDrafts = process.env.INCLUDE_DRAFTS === 'true';
   const entries = await getCollection(name, (entry: CollectionEntry<K>) => {
-    if (opts.draftGated && !includeDrafts && (entry.data as { draft?: boolean }).draft) return false;
+    if (opts.draftGated && !draftVisible(entry, { includeDrafts })) return false;
     return opts.filter ? opts.filter(entry) : true;
   });
   return entries.map((entry) => ({

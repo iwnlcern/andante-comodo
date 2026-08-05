@@ -2,6 +2,8 @@
 import Tag from '#components/common/Tag.astro';
 import Stars from '#components/common/Stars.astro';
 import type { IndexItem } from '#lib/content/collection-index';
+import { tagHref } from '#lib/content/tag-slugs.mjs';
+import { withTrailingSlash } from '#lib/internal-href.mjs';
 
 type Props = IndexItem;
 const {
@@ -39,7 +41,7 @@ const rowStyle = accent ? `--row-accent: ${accent};` : undefined;
   <div class="min-w-0 flex-1">
     <div class="flex flex-wrap items-center gap-2">
       <a
-        href={href}
+        href={withTrailingSlash(href)}
         target={external ? '_blank' : undefined}
         rel={external ? 'noopener noreferrer' : undefined}
         class="text-lg font-medium text-text-primary hl-link focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 rounded-sm"
@@ -57,13 +59,13 @@ const rowStyle = accent ? `--row-accent: ${accent};` : undefined;
         src={media.audio}
         class="mt-2 h-8 w-full max-w-sm"
         controls
-        preload="none"
+        preload="metadata"
         aria-label={`Listen to ${title}`}
       />
     )}
     {tags.length > 0 && (
       <div class="mt-1.5 flex flex-wrap gap-2">
-        {tags.slice(0, 3).map((tag) => <Tag tag={tag} href={`/tags/${tag}`} />)}
+        {tags.slice(0, 3).map((tag) => <Tag tag={tag} href={tagHref(tag)} />)}
       </div>
     )}
   </div>

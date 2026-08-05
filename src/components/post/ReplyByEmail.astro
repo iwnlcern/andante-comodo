@@ -1,0 +1,52 @@
+---
+import { site } from '#config/site.mjs';
+import { obfuscateEmail } from '#lib/contact-obfuscation.mjs';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<aside class="reply-by-email not-prose" data-reply-email aria-labelledby="reply-by-email-title">
+  <p id="reply-by-email-title" class="reply-by-email__title">Keep the conversation going</p>
+  <p>
+    Have a correction or something to add?
+    <a
+      href="#"
+      data-contact-email
+      data-contact-label="Reply by email"
+      data-email-subject={`Re: ${title}`}
+    >{obfuscateEmail(site.email)}</a>.
+  </p>
+</aside>
+
+<script>
+  import { initContactEmail } from '#scripts/contact-email.ts';
+  initContactEmail();
+</script>
+
+<style>
+  .reply-by-email {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgb(var(--color-border));
+    color: rgb(var(--color-text-secondary));
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .reply-by-email__title {
+    margin-bottom: 0.25rem;
+    color: rgb(var(--color-text-primary));
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+  }
+
+  .reply-by-email a {
+    color: rgb(var(--color-accent));
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+</style>

@@ -13,6 +13,19 @@ export function requiredCollection(id: string) {
 export const byDate = (a: { data: { date: Date } }, b: { data: { date: Date } }) =>
   b.data.date.valueOf() - a.data.date.valueOf();
 
+/** Explicit homepage rank first; deterministic title/id ordering for ties and unranked entries. */
+export const byFeaturedRank = (
+  a: { id: string; data: { featuredRank?: number; title: string } },
+  b: { id: string; data: { featuredRank?: number; title: string } },
+) => {
+  const rank = (a.data.featuredRank ?? Number.POSITIVE_INFINITY) -
+    (b.data.featuredRank ?? Number.POSITIVE_INFINITY);
+  if (rank !== 0 && !Number.isNaN(rank)) return rank;
+
+  const title = a.data.title.localeCompare(b.data.title);
+  return title !== 0 ? title : a.id.localeCompare(b.id);
+};
+
 /**
  * Highest-rated first (missing rating sorts last), with a stable title/id
  * tiebreaker for deterministic output after content-cache rebuilds.

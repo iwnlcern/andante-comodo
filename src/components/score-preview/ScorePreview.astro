@@ -18,23 +18,26 @@ const { src, title } = Astro.props;
       tabindex="0"
     >
       <div class="pdf-canvas-wrap">
+        <div class="pdf-skeleton-row" aria-hidden="true">
+          <div class="pdf-skeleton-page"></div>
+        </div>
         <div class="pdf-canvas-row">
           <canvas class="pdf-canvas" data-role="canvas-left" aria-hidden="true"></canvas>
-          <canvas class="pdf-canvas" data-role="canvas-right" aria-hidden="true"></canvas>
+          <canvas class="pdf-canvas" data-role="canvas-right" aria-hidden="true" hidden></canvas>
         </div>
       </div>
       <div class="pdf-controls">
         <button class="pdf-button" data-action="prev" type="button" aria-label="Previous page">
           Prev
         </button>
-        <span class="pdf-indicator text-xs text-text-secondary" data-role="indicator" aria-live="polite">Loading...</span>
+        <span class="pdf-indicator text-xs text-text-secondary" data-role="indicator" aria-live="polite">Loading score…</span>
         <button class="pdf-button" data-action="next" type="button" aria-label="Next page">
           Next
         </button>
         <div class="pdf-zoom">
           <button class="pdf-button" data-action="zoom-out" type="button" aria-label="Zoom out">-</button>
           <button class="pdf-button" data-action="zoom-reset" type="button" aria-label="Reset zoom">
-            <span data-role="zoom-label">100%</span>
+            <span data-role="zoom-label">Fit width</span>
           </button>
           <button class="pdf-button" data-action="zoom-in" type="button" aria-label="Zoom in">+</button>
         </div>
@@ -88,13 +91,34 @@ const { src, title } = Astro.props;
     margin: 0 auto;
   }
 
+  .pdf-skeleton-row {
+    display: inline-flex;
+    width: min(100%, 44rem);
+  }
+
+  .pdf-skeleton-page {
+    width: 100%;
+    aspect-ratio: 8.5 / 11;
+    border-radius: 0.35rem;
+    background: #faf8f1;
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.08), 0 8px 24px rgb(0 0 0 / 0.18);
+  }
+
+  .pdf-viewer:not([data-rendered-page]) .pdf-canvas-row {
+    display: none;
+  }
+
+  .pdf-viewer[data-rendered-page] .pdf-skeleton-row {
+    display: none;
+  }
+
   .pdf-canvas {
     display: block;
     max-width: none;
     max-height: none;
     flex: 0 0 auto;
     border-radius: 0.5rem;
-    background: rgb(var(--color-surface) / 1);
+    background: #faf8f1;
   }
 
   .pdf-controls {
@@ -260,7 +284,7 @@ const { src, title } = Astro.props;
         prevButton.disabled = totalPages <= 1 || currentPage <= 1;
         const maxStart = maxSpreadStart(totalPages);
         nextButton.disabled = totalPages <= 1 || currentPage >= maxStart;
-        zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
+        zoomLabel.textContent = zoom === 1 ? 'Fit width' : `${Math.round(zoom * 100)}%`;
       };
 
       const isRenderCancelled = (error) =>
@@ -493,7 +517,7 @@ const { src, title } = Astro.props;
 
       (async () => {
         try {
-          indicator.textContent = 'Loading...';
+          indicator.textContent = 'Loading score…';
           loadingTask = pdfjsLib.getDocument(src);
           pdfDoc = await loadingTask.promise;
           if (destroyed) {

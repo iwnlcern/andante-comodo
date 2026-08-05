@@ -20,7 +20,6 @@ The chrome reads this subset:
 | ----- | ------ |
 | `site.name` | Page `<title>` suffix, header wordmark, footer copyright. |
 | `site.social.github` / `.linkedin` / `.rss` | Footer links. |
-| `site.meta.ogImage` | Default Open Graph / Twitter card image path. |
 | `site.meta.templateHref` | Optional. When set, the footer adds "Like this website? Get the template." linking to it. Delete the key to remove the line. |
 | `site.email` | Contact email, shown obfuscated (reassembled client-side) on `/resume` and the home-page hero. Sample data — replace with your own. |
 
@@ -191,8 +190,8 @@ before your first blog push.
    hero/URL fields documented in that file.
 2. Edit `src/config/collections.mjs` - rename/reorder/hide sections, set
    nav/homepage/feed membership, and relabel taxonomies.
-3. Replace the assets the config points at: `public/portrait.jpg`,
-   `public/og-image.png`, favicons, and any demo media you keep.
+3. Replace the assets the config points at: `public/portrait.jpg`, favicons,
+   and any demo media you keep. Open Graph cards are generated per route.
 4. Edit `src/data/resume.ts` and replace all seven resume exports.
 5. Copy `.env.example` to `.env` and set `RSS_FEED_URL` + `LISTMONK_FROM_EMAIL`
    (and the listmonk/recaptcha secrets).

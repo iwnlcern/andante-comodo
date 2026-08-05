@@ -30,9 +30,9 @@ export function spreadIndicator(current, totalPages) {
 }
 
 export function computeFitScale(wrapWidth, wrapHeight, left, right, zoom, gap = 16) {
-  const totalWidth = right ? left.width + right.width + gap : left.width;
-  const maxHeight = right ? Math.max(left.height, right.height) : left.height;
-  return Math.min(wrapWidth / totalWidth, wrapHeight / maxHeight) * zoom;
+  const horizontalPadding = gap * 2;
+  const availableWidth = Math.max(1, wrapWidth - horizontalPadding);
+  return (availableWidth / left.width) * zoom;
 }
 
 export function zoomStep(zoom, delta, min, max) {
