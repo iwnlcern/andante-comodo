@@ -1,0 +1,47 @@
+name: SPC4 CyPari wheel relay
+
+on:
+  push:
+    branches:
+      - spc4-cypari-wheel-20260809
+    paths:
+      - '.github/workflows/spc4-cypari-wheel.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  relay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Download exact CyPari wheel
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p artifact
+          python -m pip download \
+            --only-binary=:all: \
+            --no-deps \
+            --dest artifact \
+            'cypari==2.5.6'
+          sha256sum artifact/* | tee artifact/SHA256SUMS
+          python - <<'PY'
+          from pathlib import Path
+          wheels=list(Path('artifact').glob('*.whl'))
+          assert len(wheels)==1, wheels
+          assert 'cp313' in wheels[0].name, wheels[0]
+          assert 'x86_64' in wheels[0].name, wheels[0]
+          print(wheels[0], wheels[0].stat().st_size)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: spc4-cypari-cp313-linux
+          path: artifact/
+          retention-days: 1
+          if-no-files-found: error
+          compression-level: 0
