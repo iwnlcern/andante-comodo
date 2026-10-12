@@ -19,7 +19,6 @@
   position: relative;
   z-index: 1;
   display: block;
-  text-align: right;
   margin-top: 0.1rem;
   line-height: 0;
   color: rgb(var(--color-accent));
@@ -31,6 +30,9 @@
 }
 
 .post-prose .sn-chevron svg {
+  /* The icon is block-level (Tailwind preflight), so text-align on the row cannot move it;
+     an auto margin puts it at the row's far edge. */
+  margin-inline-start: auto;
   width: 1.25em;
   height: 1.25em;
   fill: none;
