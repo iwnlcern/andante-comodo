@@ -82,6 +82,36 @@ test('per-route Open Graph cards are generated', () => {
   assert.match(html, /property="og:image" content="[^"]*\/og\/home\.png"/, 'homepage points at its generated card');
 });
 
+function builtCss() {
+  const assets = path.join(dist, '_astro');
+  return readdirSync(assets)
+    .filter((file) => file.endsWith('.css'))
+    .map((file) => readFileSync(path.join(assets, file), 'utf8'))
+    .join('\n');
+}
+
+test('external-link marker rule injects the host as a valid attribute value', () => {
+  const css = builtCss();
+  const hostname = new URL(site.url).hostname;
+  const host = hostname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // An unquoted attribute value must be a CSS identifier. A dotted host is not one, and a
+  // single invalid selector voids the whole rule, so the minifier may only have dropped the
+  // quotes when the host is identifier-safe.
+  const hostValue = /^-?[a-z_][a-z0-9_-]*$/i.test(hostname) ? `"?${host}"?` : `"${host}"`;
+  assert.match(css, new RegExp(`:not\\(\\[href\\*=${hostValue}\\]\\)`), 'host selector is valid CSS');
+  assert.equal(css.includes('__SITE_HOST__'), false, 'no host sentinel left in built CSS');
+});
+
+test('every typography color resolves through a palette token', () => {
+  // A plugin default is one fixed gray, so it is wrong in at least one of the two themes.
+  const colors = [...builtCss().matchAll(/--tw-prose-(?!invert-)([a-z-]+):\s*([^;}]+)/g)];
+  assert.ok(colors.length > 0, 'compiled CSS declares the --tw-prose-* color variables');
+  const offPalette = [
+    ...new Set(colors.filter(([, , value]) => !value.includes('var(--color-')).map(([, name]) => name)),
+  ].sort();
+  assert.deepEqual(offPalette, []);
+});
+
 test('draft blog fixture is absent from a flagless production build', () => {
   assert.equal(routeExists('/blog/draft-rehearsal-note'), false, 'draft route should not be built');
 });

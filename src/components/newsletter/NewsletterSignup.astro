@@ -60,8 +60,10 @@ const showRecaptchaDevNote = import.meta.env.DEV && !recaptchaEnabled;
           {buttonLabel}
         </button>
       </div>
+      {/* Direct children of the form on purpose: a wrapper is a zero-height flex item while
+          both messages are hidden, and it still claims a gap-2 slot under the input row. */}
       {recaptchaEnabled && (
-        <div class="space-y-2">
+        <>
           <input type="hidden" name="g-recaptcha-response" value="" data-recaptcha-response />
           <p class="hidden text-xs text-red-300" data-recaptcha-error>
             reCAPTCHA verification failed. Please try again.
@@ -69,7 +71,7 @@ const showRecaptchaDevNote = import.meta.env.DEV && !recaptchaEnabled;
           <p class="hidden text-xs text-red-300" data-recaptcha-load-error>
             reCAPTCHA failed to load. Disable blockers and refresh.
           </p>
-        </div>
+        </>
       )}
       <p class="hidden text-xs" data-newsletter-status aria-live="polite"></p>
     </form>
