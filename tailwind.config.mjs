@@ -87,6 +87,15 @@ export default {
             '--tw-prose-counters': 'rgb(var(--color-text-secondary) / 1)',
             '--tw-prose-bullets': 'rgb(var(--color-text-secondary) / 1)',
             '--tw-prose-hr': 'rgb(var(--color-border) / 1)',
+            // Bridge every color variable the plugin declares: an unbridged one keeps the
+            // plugin's light-theme gray in BOTH themes.
+            '--tw-prose-lead': 'rgb(var(--color-text-secondary) / 1)',
+            '--tw-prose-captions': 'rgb(var(--color-text-secondary) / 1)',
+            '--tw-prose-kbd': 'rgb(var(--color-text-primary) / 1)',
+            '--tw-prose-kbd-shadows': 'rgb(var(--color-text-primary) / 0.1)',
+            '--tw-prose-quote-borders': 'rgb(var(--color-border) / 1)',
+            '--tw-prose-th-borders': 'rgb(var(--color-border) / 1)',
+            '--tw-prose-td-borders': 'rgb(var(--color-border) / 1)',
             maxWidth: 'none',
           },
         },

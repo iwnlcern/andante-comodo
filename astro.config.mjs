@@ -36,24 +36,36 @@ const unlistedUrls = new Set(
   )
 );
 
-/** Replace the external-link host sentinel before and after CSS bundling. */
+/**
+ * Replace the external-link host sentinel in compiled CSS.
+ *
+ * Deliberately a normal-order transform: it runs after Vite's CSS plugin has inlined the
+ * @import-ed partials (an `enforce: 'pre'` hook only ever sees the bare @import lines) and
+ * before minification. The minifier unquotes [href*="__SITE_HOST__"] because the sentinel
+ * is a valid CSS identifier; a dotted host dropped into that unquoted slot is an invalid
+ * selector, and browsers then discard the whole rule. Substituting first hands the
+ * minifier a value it has to keep quoted.
+ */
 function siteHostCssPlugin() {
   const host = siteHost;
-  const replaceHost = (code) => code.replaceAll('__SITE_HOST__', host);
+  const sentinel = '__SITE_HOST__';
 
   return {
     name: 'site-host-css-inject',
-    enforce: 'pre',
     transform(code, id) {
-      if (!id.includes('base-layered.css')) return null;
-      if (!code.includes('__SITE_HOST__')) return null;
-      return { code: replaceHost(code), map: null };
+      if (!/\.css(?:$|\?)/.test(id) || !code.includes(sentinel)) return null;
+      return { code: code.replaceAll(sentinel, host), map: null };
     },
+    // Fail closed: a sentinel in the bundle means the transform no longer sees that
+    // stylesheet, and replacing it here (after minification) is the bug described above.
     generateBundle(_options, bundle) {
       for (const asset of Object.values(bundle)) {
-        if (asset.type !== 'asset') continue;
-        if (typeof asset.source !== 'string' || !asset.source.includes('__SITE_HOST__')) continue;
-        asset.source = replaceHost(asset.source);
+        if (asset.type !== 'asset' || typeof asset.source !== 'string') continue;
+        if (asset.source.includes(sentinel)) {
+          this.error(
+            `${sentinel} reached ${asset.fileName} unreplaced: siteHostCssPlugin's transform did not run on its stylesheet.`,
+          );
+        }
       }
     },
   };
