@@ -5,7 +5,7 @@ import Tag from '#components/common/Tag.astro';
 import { collectionPaths } from '#lib/content/collection-paths';
 import { tagHref } from '#lib/content/tag-slugs.mjs';
 
-export const getStaticPaths = () => collectionPaths('projects', { propKey: 'project' });
+export const getStaticPaths = () => collectionPaths('projects', { propKey: 'project', draftGated: true });
 
 const { project } = Astro.props;
 const { Content, headings } = await render(project);

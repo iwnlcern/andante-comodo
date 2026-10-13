@@ -30,7 +30,7 @@ Optional frontmatter:
 
 Set `draft: true` on a blog post to keep it out of every listing, the homepage, tag
 pages, and both RSS feeds while you work on it. Drafts stay hidden from those surfaces
-in all builds. (`draft` exists only on `blog` and defaults to `false`.) A test-only
+in all builds. (`draft` exists on `blog` and `projects` and defaults to `false`.) A test-only
 `INCLUDE_DRAFTS` build flag can surface drafts in non-production builds; production
 builds always hide them.
 
@@ -73,6 +73,7 @@ Required frontmatter:
 
 Optional frontmatter:
 - `tags` (string[])
+- `draft` (boolean) — same semantics as the blog flag: hidden from the projects index, homepage, tag pages, and OG cards; the route is not built in production
 - `github` (URL)
 - `live` (URL)
 

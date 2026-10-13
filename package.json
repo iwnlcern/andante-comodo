@@ -51,6 +51,7 @@
     "build": "astro build",
     "dev": "astro dev",
     "postbuild": "pagefind --site dist && node tools/prune-sitemap.mjs dist",
+    "prebuild": "node tools/git-unshallow.mjs",
     "preview": "astro preview",
     "rss:sync": "node tools/rss-to-listmonk.mjs",
     "test": "node --test tests/smoke.mjs"

@@ -57,8 +57,9 @@ function defaultRun() {
 
 // A shallow clone (depth-1 CI checkout, e.g. Cloudflare Pages) attributes every
 // content file to the boundary commit, so "last modified" would collapse to the
-// clone time — fresh-looking but false. Missing git falls through to the run()
-// catch below, so errors here mean "not shallow".
+// clone time — fresh-looking but false. tools/git-unshallow.mjs (npm prebuild)
+// deepens the clone before we get here; this guard remains for when it cannot.
+// Missing git falls through to the run() catch below, so errors here mean "not shallow".
 function defaultIsShallow() {
   try {
     return (

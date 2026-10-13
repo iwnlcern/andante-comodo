@@ -7,7 +7,7 @@ import { itemsForCollection } from '#lib/content/feed-items';
 export async function GET(context: APIContext) {
   const primary = primaryFeedCollection();
   const items = primary
-    ? (await itemsForCollection(primary)).sort((a, b) => b.pubDate.valueOf() - a.pubDate.valueOf())
+    ? (await itemsForCollection(primary, context.site!.toString())).sort((a, b) => b.pubDate.valueOf() - a.pubDate.valueOf())
     : [];
 
   return rss({

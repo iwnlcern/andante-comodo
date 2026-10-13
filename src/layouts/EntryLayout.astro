@@ -46,7 +46,8 @@ const {
 <BaseLayout title={title} description={description} image={image} wide={width === 'full'} post={post || readingApparatus} noindex={noindex} datePublished={datePublished} dateModified={dateModified}>
   {readingApparatus && <div class="rt-progress" id="rtProgress" aria-hidden="true"></div>}
   <article class={width === 'full' ? 'w-full' : 'relative mx-auto w-full max-w-[var(--measure)]'}>
-    <header class="mb-8">
+    {/* Full-width entries keep the header in the reading column; only the before-body slot may run wide. */}
+    <header class={width === 'full' ? 'mb-8 mx-auto w-full max-w-[var(--measure)]' : 'mb-8'}>
       {backHref && (
         <a href={withTrailingSlash(backHref)} class="text-sm text-text-secondary hover:text-accent mb-4 inline-block">
           &larr; {backLabel}

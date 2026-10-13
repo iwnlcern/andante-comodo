@@ -33,28 +33,26 @@ const readingWords = typeof wordCount === 'number' ? `${wordCount.toLocaleString
     <time datetime={date.toISOString()}>{dateLabel ? `${dateLabel} ${formattedDate}` : formattedDate}</time>
   )}
   {updated && (
-    <Fragment>
-      <span>·</span>
-      <time datetime={updated.toISOString()}>Updated {formattedUpdated}</time>
-    </Fragment>
+    <span class="inline-flex items-center gap-3 whitespace-nowrap"><span aria-hidden="true">·</span><time datetime={updated.toISOString()}>Updated {formattedUpdated}</time></span>
   )}
   {typeof readingMinutes === 'number' && (
-    <Fragment>
-      <span>·</span>
+    <span class="inline-flex items-center gap-3 whitespace-nowrap">
+      <span aria-hidden="true">·</span>
       <MetaPopover>
         <span slot="trigger" tabindex="0" aria-label={readingWords}>{readingMinutes} min read</span>
         {readingWords}
       </MetaPopover>
-    </Fragment>
+    </span>
   )}
   {ai && (
-    <Fragment>
-      <span>·</span>
+    <span class="inline-flex items-center gap-3 whitespace-nowrap">
+      <span aria-hidden="true">·</span>
       <AiSignal ai={ai} />
-    </Fragment>
+    </span>
   )}
-  {tags.length > 0 && <span>·</span>}
-  {tags.map((tag) => (
-    <Tag tag={tag} href={tagHref(tag)} />
+  {tags.map((tag, index) => (
+    index === 0
+      ? <span class="inline-flex items-center gap-3 whitespace-nowrap"><span aria-hidden="true">·</span><Tag tag={tag} href={tagHref(tag)} /></span>
+      : <Tag tag={tag} href={tagHref(tag)} />
   ))}
 </div>

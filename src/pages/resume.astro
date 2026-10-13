@@ -11,7 +11,7 @@ import {
   skills,
 } from '#data/resume';
 import { site } from '#config/site.mjs';
-import { obfuscateEmail, obfuscatePhone } from '#lib/contact-obfuscation.mjs';
+import { obfuscateEmail } from '#lib/contact-obfuscation.mjs';
 
 const githubLabel = site.social.github.replace(/^https?:\/\//, '').replace(/\/$/, '');
 const linkedinLabel = site.social.linkedin.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
@@ -19,19 +19,10 @@ const linkedinLabel = site.social.linkedin.replace(/^https?:\/\/(www\.)?/, '').r
 
 <BaseLayout title="Resume" description={`Resume for ${profile.name}.`} bodyClass="resume-page">
   <article class="resume-base max-w-4xl mx-auto font-dense">
-    <div class="resume-print-control mb-5 flex justify-end">
-      <button
-        type="button"
-        data-print-page
-        class="inline-flex items-center rounded border border-border px-3 py-2 text-sm text-text-secondary transition-colors hover:border-text-secondary hover:text-text-primary"
-      >Print / Save PDF</button>
-    </div>
     <header class="border-b border-border pb-6 mb-8">
       <h1 class="text-4xl font-bold font-dense">{profile.name}</h1>
       <p class="text-text-secondary mt-2">{profile.location}</p>
       <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm mt-3">
-        <span>{obfuscatePhone(profile.phone)}</span>
-        <span class="text-text-secondary">|</span>
         <span class="text-text-primary">{obfuscateEmail(site.email)}</span>
         <span class="text-text-secondary">|</span>
         <a href={site.social.linkedin} class="text-accent ext-link">
@@ -42,6 +33,9 @@ const linkedinLabel = site.social.linkedin.replace(/^https?:\/\/(www\.)?/, '').r
           {githubLabel}
         </a>
       </div>
+      {profile.referenceNote && (
+        <p class="text-sm text-text-secondary mt-3">{profile.referenceNote}</p>
+      )}
     </header>
 
     <section class="mb-10">
@@ -116,11 +110,6 @@ const linkedinLabel = site.social.linkedin.replace(/^https?:\/\/(www\.)?/, '').r
   </article>
 </BaseLayout>
 
-<script>
-  import { initPrintPage } from '#scripts/print-page.ts';
-  initPrintPage();
-</script>
-
 <style is:global>
   @media print {
     @page {
@@ -139,7 +128,6 @@ const linkedinLabel = site.social.linkedin.replace(/^https?:\/\/(www\.)?/, '').r
     body.resume-page > header,
     body.resume-page > footer,
     body.resume-page > .skip-link,
-    body.resume-page .resume-print-control,
     body.resume-page [data-theme-toggle] {
       display: none !important;
     }

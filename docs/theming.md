@@ -88,8 +88,13 @@ mirrors **every** token — edit both. Token groups:
 - `--accent-*` — per-section accent colors (technical, slice-of-life, rants,
   project, work).
 - `--adm-*` — admonition colors (tip / caution / danger).
-- `--theme-outline-width` / `--theme-divider-width` / `--audio-control-filter` —
-  per-theme chrome tweaks.
+- `--color-gold` — theme-invariant metallic gold for star ratings (defined once in the
+  dark block, deliberately not mirrored).
+- `--shadow-lift` / `--shadow-float` — the two elevation shadows (card and chooser hover lift;
+  nav pill and floating lens panel). Themed per block so shadows read as black over the dark
+  ground and as ink over cream; nothing else hardcodes an rgba shadow.
+- `--audio-control-filter` — per-theme tweak for native audio controls. Border widths are
+  NOT per-theme: both themes share identical geometry so toggling never shifts layout.
 
 To recolor the site, edit the triplets in **both** the dark and light blocks.
 

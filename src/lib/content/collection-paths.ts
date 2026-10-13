@@ -8,7 +8,7 @@ type PathOpts<K extends CollectionKey> = {
   propKey: string;
   /** Optional entry filter (e.g. reading: type === 'book'). */
   filter?: (entry: CollectionEntry<K>) => boolean;
-  /** When true, include drafts iff INCLUDE_DRAFTS=true (blog only). */
+  /** When true, include drafts iff INCLUDE_DRAFTS=true (collections with a `draft` field). */
   draftGated?: boolean;
 };
 

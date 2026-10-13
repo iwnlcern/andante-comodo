@@ -60,6 +60,18 @@ test('combined RSS feed contains at least one item', () => {
   assert.match(rss, /<item>[\s\S]*<\/item>/, 'rss.xml should contain at least one item');
 });
 
+test('every feed item carries full content beside its summary', () => {
+  for (const file of ['rss.xml', 'rss-blog.xml']) {
+    const items = readFileSync(path.join(dist, file), 'utf8').match(/<item>[\s\S]*?<\/item>/g) ?? [];
+    assert.ok(items.length > 0, `${file} should contain at least one item`);
+    for (const item of items) {
+      // The newsletter sync reads the summary; feed readers get the whole post.
+      assert.match(item, /<description>/, `${file}: item keeps its summary`);
+      assert.match(item, /<content:encoded>/, `${file}: item carries full content`);
+    }
+  }
+});
+
 test('configured demo identity renders on the homepage', () => {
   const html = readFileSync(path.join(dist, 'index.html'), 'utf8');
   assert.match(html, new RegExp(site.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));

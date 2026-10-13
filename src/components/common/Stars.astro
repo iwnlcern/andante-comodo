@@ -4,8 +4,6 @@ const { value } = Astro.props as { value: number };
 const EXTRAORDINARY_RATING = 6;
 const isExtraordinary = value === EXTRAORDINARY_RATING;
 const displayValue = Math.min(value, 5);
-const baseColor = isExtraordinary ? 'rgb(245, 197, 66)' : '#4b5563';
-const fillColor = isExtraordinary ? 'rgb(245, 197, 66)' : '#3b82f6';
 const stars = Array.from({ length: 5 }, (_, index) => {
   const fill = Math.max(0, Math.min(1, displayValue - index));
   return { fill, index };
@@ -21,11 +19,11 @@ const stars = Array.from({ length: 5 }, (_, index) => {
     {stars.map(({ fill, index }) => (
       <span class="star" style={`--star-fill: ${fill * 100}%`} data-index={index}>
         <svg class="star__base" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-          <path fill={baseColor} d="M12 17.3 18.2 21l-1.7-7.1L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21z"></path>
+          <path fill="currentColor" d="M12 17.3 18.2 21l-1.7-7.1L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21z"></path>
         </svg>
         <span class="star__fill">
           <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-            <path fill={fillColor} d="M12 17.3 18.2 21l-1.7-7.1L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21z"></path>
+            <path fill="currentColor" d="M12 17.3 18.2 21l-1.7-7.1L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21z"></path>
           </svg>
         </span>
       </span>
@@ -33,11 +31,11 @@ const stars = Array.from({ length: 5 }, (_, index) => {
     {isExtraordinary && (
       <span class="star star--extra" style="--star-fill: 100%" aria-hidden="true">
         <svg class="star__base" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-          <path fill={baseColor} d="M12 17.3 18.2 21l-1.7-7.1L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21z"></path>
+          <path fill="currentColor" d="M12 17.3 18.2 21l-1.7-7.1L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21z"></path>
         </svg>
         <span class="star__fill">
           <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-            <path fill={fillColor} d="M12 17.3 18.2 21l-1.7-7.1L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21z"></path>
+            <path fill="currentColor" d="M12 17.3 18.2 21l-1.7-7.1L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21z"></path>
           </svg>
         </span>
       </span>
@@ -48,12 +46,25 @@ const stars = Array.from({ length: 5 }, (_, index) => {
 </span>
 
 <style>
+  /* Colors ride the palette tokens (base-layered.css): filled stars are the theme-invariant
+     --color-gold (gold in both themes, not the bronze light accent), empty stars sit on the
+     border tone. The 6/5 rating is the same gold set apart by its sixth star, glow, and badge. */
   .stars {
     --star-size: 1.05rem;
     --star-gap: 0.15rem;
+    --star-base: rgb(var(--color-border));
+    --star-on: rgb(var(--color-gold));
     display: inline-flex;
     align-items: center;
     gap: .35rem;
+  }
+
+  .star__base {
+    color: var(--star-base);
+  }
+
+  .star__fill {
+    color: var(--star-on);
   }
 
   .stars__row {
@@ -86,8 +97,8 @@ const stars = Array.from({ length: 5 }, (_, index) => {
   .stars--extraordinary .stars__row,
   .stars--extraordinary .star--extra {
     filter:
-      drop-shadow(0 0 6px rgba(245, 197, 66, .55))
-      drop-shadow(0 0 14px rgba(245, 197, 66, .35));
+      drop-shadow(0 0 6px rgb(var(--color-gold) / .55))
+      drop-shadow(0 0 14px rgb(var(--color-gold) / .35));
   }
 
   .badge {
@@ -95,7 +106,7 @@ const stars = Array.from({ length: 5 }, (_, index) => {
     line-height: 1;
     padding: .15rem .35rem;
     border-radius: .4rem;
-    border: 1px solid rgba(245, 197, 66, .6);
-    color: rgb(245, 197, 66);
+    border: 1px solid rgb(var(--color-gold) / .6);
+    color: var(--star-on);
   }
 </style>
