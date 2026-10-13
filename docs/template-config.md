@@ -21,6 +21,7 @@ The chrome reads this subset:
 | `site.name` | Page `<title>` suffix, header wordmark, footer copyright. |
 | `site.social.github` / `.linkedin` / `.rss` | Footer links. |
 | `site.meta.templateHref` | Optional. When set, the footer adds "Like this website? Get the template." linking to it. Delete the key to remove the line. |
+| `site.meta.templateNote` | Optional short note, rendered in parentheses after that link. Omit for a plain link. |
 | `site.email` | Contact email, shown obfuscated (reassembled client-side) on `/resume` and the home-page hero. Sample data — replace with your own. |
 
 Other fields (`site.url` — the hostname is derived from it, not edited
@@ -119,8 +120,9 @@ This table lists the scripts available in the template package.
 | Script | Runs | Purpose |
 | ------ | ---- | ------- |
 | `npm run dev` | `astro dev` | Local dev server (http://localhost:4321). |
-| `npm run build` | `astro build` -> `dist/` | Production build; auto-runs `postbuild`. |
-| `postbuild` (auto) | `pagefind --site dist` | Builds the Pagefind search index into `dist/`. No separate config. |
+| `npm run build` | `astro build` -> `dist/` | Production build; auto-runs `prebuild` and `postbuild`. |
+| `prebuild` (auto) | `node tools/git-unshallow.mjs` | Deepens a shallow CI clone so the git-based "Updated" dates work. Never fails the build. |
+| `postbuild` (auto) | `pagefind --site dist && node tools/prune-sitemap.mjs dist` | Builds the Pagefind search index into `dist/`, then drops noindexed pages from the sitemap. No separate config. |
 | `npm run preview` | `astro preview` | Unsupported under the Cloudflare adapter; serve `dist/` statically instead. |
 | `npm run rss:sync` | `node tools/rss-to-listmonk.mjs` | Newsletter RSS sync; see [listmonk-rss-automation.md](./listmonk-rss-automation.md). |
 

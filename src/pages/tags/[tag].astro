@@ -21,7 +21,7 @@ export async function getStaticPaths() {
   const enabledIds = new Set(enabledCollections().map((collection) => collection.id));
   const [allBlog, allProjects, allGarden, allReading] = await Promise.all([
     getCollection('blog', listable),
-    getCollection('projects'),
+    getCollection('projects', listable),
     getCollection('garden'),
     getCollection('reading'),
   ]);

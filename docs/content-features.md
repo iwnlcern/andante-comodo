@@ -39,6 +39,9 @@ A paragraph containing only an image, for example `![Alt text](/img/example.png)
 
 Gotcha: the image must be the paragraph's only meaningful content. If text or other inline content shares the paragraph, the transform leaves it alone.
 
+Gotcha: an SVG diagram is embedded as an image, so it cannot follow the light/dark theme.
+Give it an opaque full-canvas background `<rect>`, or its ink disappears on one of the two grounds.
+
 ### Figure Credits
 
 Source: `src/lib/markdown/figureCredits.mjs:37-109`; lightbox credit display: `src/components/post/Lightbox.astro:70-75`.

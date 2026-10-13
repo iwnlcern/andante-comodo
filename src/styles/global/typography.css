@@ -1,5 +1,5 @@
-/* Content links and card/box titles light up accent-blue when the link — or the card holding
-   it — is hovered. Unlayered so it beats Tailwind's resting color utilities. */
+/* Content links and card/box titles light up in the accent color when the link — or the
+   card holding it — is hovered. Unlayered so it beats Tailwind's resting color utilities. */
 .hl-link {
   transition: color 0.15s ease;
 }
@@ -69,9 +69,11 @@
   letter-spacing: 0.005em;
 }
 
-/* Home hero. Ratios of --ui-base, matching the prior inline clamp on index.astro. */
+/* Home hero. Ratios of --ui-base. The floor is the 2xl step (1.5319): the 3.4vw preferred term
+   collapses to ~13px on phones, and the previous 1.055 floor left the headline at body size
+   next to the 1.0 bio, erasing the hero hierarchy on small screens. */
 .hero-title {
-  font-size: clamp(calc(var(--ui-base) * 1.055), 3.4vw, calc(var(--ui-base) * 1.974));
+  font-size: clamp(calc(var(--ui-base) * 1.5319), 3.4vw, calc(var(--ui-base) * 1.974));
   line-height: 1.12;
   font-weight: 400;
 }

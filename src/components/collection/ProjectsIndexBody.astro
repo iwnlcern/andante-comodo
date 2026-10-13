@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import CollectionIndex from '#components/collection/CollectionIndex.astro';
 import { projectItem, byDate, dropEmptySections } from '#lib/content/collection-items';
+import { listable } from '#lib/content/listable.mjs';
 import type { IndexSection } from '#lib/content/collection-index';
 
 interface Props {
@@ -13,7 +14,7 @@ interface Props {
 
 const { entry } = Astro.props;
 
-const projects = (await getCollection('projects')).sort(byDate);
+const projects = (await getCollection('projects', listable)).sort(byDate);
 
 const sections: IndexSection[] = dropEmptySections([
   { variant: 'cards', scope: 'projects', items: projects.map(projectItem) },

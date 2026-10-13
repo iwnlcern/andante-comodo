@@ -56,7 +56,8 @@ export const getStaticPaths = (async () => {
     kicker: taxonomyLabel('blog', post.data.category),
     detail: formatDate(post.data.date),
   })));
-  cards.push(...projects.map((project) => ({
+  const routableProjects = projects.filter(draftVisible);
+  cards.push(...routableProjects.map((project) => ({
     slug: `projects/${project.id}`,
     title: project.data.title,
     kicker: 'Project',
@@ -78,7 +79,7 @@ export const getStaticPaths = (async () => {
   const visibleBlog = routableBlog.filter(listable);
   const tags = new Set([
     ...visibleBlog.flatMap((entry) => entry.data.tags),
-    ...projects.flatMap((entry) => entry.data.tags),
+    ...routableProjects.filter(listable).flatMap((entry) => entry.data.tags),
     ...reading.flatMap((entry) => entry.data.tags),
   ]);
   cards.push(...[...tags].map((tag) => ({

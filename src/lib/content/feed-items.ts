@@ -7,34 +7,9 @@ interface FeedCollection {
   slug: string;
 }
 
-/** Build summary-only RSS items for a feed-enabled collection. */
-export async function itemsForCollection(entry: FeedCollection) {
-  switch (entry.id) {
-    case 'blog': {
-      const blog = await getCollection('blog', listable);
-      return blog.map((post) => ({
-        title: post.data.title,
-        pubDate: post.data.date,
-        description: post.data.description,
-        link: `${entry.slug}/${post.id}/`,
-      }));
-    }
-    case 'garden': {
-      const garden = await getCollection('garden');
-      return garden.map((note) => ({
-        title: note.data.title,
-        pubDate: note.data.date,
-        description: `${note.data.type}: ${note.data.title}`,
-        link: `${entry.slug}/${note.id}/`,
-      }));
-    }
-    default:
-      return [];
-  }
-}
-
-/** Build rendered, full-content RSS items for a feed-enabled collection. */
-export async function fullItemsForCollection(entry: FeedCollection, siteUrl: string) {
+/** Build full-content RSS items for a feed-enabled collection. Every feed is full content;
+ *  `description` stays the summary so downstream consumers (rss:sync) keep a short blurb. */
+export async function itemsForCollection(entry: FeedCollection, siteUrl: string) {
   switch (entry.id) {
     case 'blog': {
       const blog = await getCollection('blog', listable);

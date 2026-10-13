@@ -1,4 +1,11 @@
 @media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+  .card:hover {
+    transform: none;
+  }
+
   .lens .dot,
   .post-prose .sn-body,
   .post-prose .sn-chevron svg,

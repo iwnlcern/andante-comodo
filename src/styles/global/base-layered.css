@@ -17,7 +17,11 @@
     --color-border: 44 38 29;
     --color-text-primary: 248 247 244;
     --color-text-secondary: 165 161 154;
-    --color-accent: 59 130 246;
+    /* Warm gold, matched to the generated Open Graph cards (#caa574). */
+    --color-accent: 202 165 116;
+    /* Theme-invariant metallic gold (#d4af37) for star ratings; deliberately NOT mirrored in
+       the light block so stars stay gold on cream instead of turning bronze with the accent. */
+    --color-gold: 212 175 55;
     --accent-technical: 90 158 152;
     --accent-slice-of-life: 195 154 58;
     --accent-rants: 164 127 176;
@@ -26,9 +30,10 @@
     --adm-tip: 74 170 110;
     --adm-caution: 199 154 64;
     --adm-danger: 212 96 84;
-    --theme-outline-width: 1px;
-    --theme-divider-width: 1px;
     --audio-control-filter: invert(1);
+    /* Elevation shadows, themed: black over the dark ground, ink over cream. */
+    --shadow-lift: 0 10px 24px rgb(0 0 0 / 0.5);
+    --shadow-float: 0 12px 32px rgb(0 0 0 / 0.35);
     color-scheme: dark;
   }
 
@@ -40,7 +45,9 @@
     --color-border: 210 201 182;
     --color-text-primary: 26 24 20;
     --color-text-secondary: 92 86 74;
-    --color-accent: 37 99 235;
+    /* Bronze: the darkest gold that clears AA for body links on the cream background.
+       Intentionally the same value as --accent-slice-of-life below. */
+    --color-accent: 125 96 22;
     --accent-technical: 47 99 94;
     --accent-slice-of-life: 125 96 22;
     --accent-rants: 126 90 140;
@@ -49,9 +56,9 @@
     --adm-tip: 33 110 60;
     --adm-caution: 125 96 22;
     --adm-danger: 176 57 43;
-    --theme-outline-width: 2px;
-    --theme-divider-width: 1.5px;
     --audio-control-filter: none;
+    --shadow-lift: 0 10px 24px rgb(26 24 20 / 0.16);
+    --shadow-float: 0 12px 32px rgb(26 24 20 / 0.08);
     color-scheme: light;
   }
 
@@ -74,7 +81,7 @@
     text-decoration: none;
   }
 
-  /* Content links light up accent-blue when hovered. Structural links — heading
+  /* Content links light up in the accent color when hovered. Structural links — heading
      anchors, the # glyph, sidenote numbers — opt out. */
   .prose a:not(.head-link):not(.hash):not(.sn-num):hover,
   .prose a:not(.head-link):not(.hash):not(.sn-num):focus-visible {
@@ -128,24 +135,25 @@
 }
 
 @layer utilities {
-  :root[data-theme='light'] .border {
-    border-width: var(--theme-outline-width);
-  }
-
-  :root[data-theme='light'] .border-t {
-    border-top-width: var(--theme-divider-width);
-  }
-
-  :root[data-theme='light'] .border-b {
-    border-bottom-width: var(--theme-divider-width);
-  }
-
   .tag.is-active {
-    @apply border-accent bg-accent text-white;
+    @apply border-accent bg-accent text-background;
   }
 
   .card.is-filtered,
   [data-filter-tags].is-filtered {
     @apply opacity-40 grayscale;
+  }
+
+  /* Card lift: one transition covering everything that changes on hover (the
+     Tailwind transition-* utilities override each other and none covers box-shadow). */
+  .card {
+    transition:
+      transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+      border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card:hover {
+    transform: translateY(-0.25rem);
+    box-shadow: var(--shadow-lift);
   }
 }

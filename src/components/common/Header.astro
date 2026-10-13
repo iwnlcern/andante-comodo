@@ -34,7 +34,8 @@ const mobileLinkClass = (href) =>
       class="min-w-0 text-lg font-semibold leading-tight text-text-primary hover:no-underline"
       style="margin-left: max(0px, (100vw - 64rem) / 2);"
     >{site.name}</a>
-    <ul class="hidden lg:flex items-center gap-1 rounded border border-border bg-surface px-2 py-1 shadow-[0_12px_32px_rgba(15,23,42,0.08)]">
+    {/* The shadow: type hint is load-bearing: Tailwind reads a bare var() here as a shadow color and sets no box-shadow. */}
+    <ul class="hidden lg:flex items-center gap-1 rounded border border-border bg-surface px-2 py-1 shadow-[shadow:var(--shadow-float)]">
       {navItems.map((item) => (
         <li>
           <a href={withTrailingSlash(item.href)} class={desktopLinkClass(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}>
@@ -47,18 +48,19 @@ const mobileLinkClass = (href) =>
       <button
         type="button"
         data-theme-toggle
-        class="inline-flex items-center gap-2 rounded border border-border px-3 py-1.5 text-sm text-text-secondary transition-colors hover:border-text-secondary hover:text-text-primary"
+        class="inline-flex h-9 items-center gap-2 rounded border border-border px-3 text-sm text-text-secondary transition-colors hover:border-text-secondary hover:text-text-primary"
         aria-label="Switch to light mode"
         title="Switch to light mode"
       >
         <span aria-hidden="true" data-theme-toggle-icon>◐</span>
-        <span class="hidden sm:inline" data-theme-toggle-label>Light</span>
+        <!-- Fixed label width: "Light" and "Dark" differ by ~2px, which would shift the button on toggle. -->
+        <span class="hidden sm:inline-block min-w-[2.1em] text-left" data-theme-toggle-label>Light</span>
       </button>
       <Search />
       <button
         id="mobile-nav-toggle"
         type="button"
-        class="lg:hidden inline-flex items-center justify-center rounded border border-border px-3 py-1.5 text-sm text-text-secondary hover:border-text-secondary hover:text-text-primary transition-colors"
+        class="lg:hidden inline-flex h-9 items-center justify-center rounded border border-border px-3 text-sm text-text-secondary hover:border-text-secondary hover:text-text-primary transition-colors"
         aria-controls="mobile-nav-panel"
         aria-expanded="false"
       >
@@ -66,7 +68,7 @@ const mobileLinkClass = (href) =>
       </button>
     </div>
   </nav>
-  <div id="mobile-nav-panel" class="lg:hidden hidden border-t border-border bg-surface/80 backdrop-blur-sm">
+  <div id="mobile-nav-panel" class="lg:hidden hidden border-t border-border bg-surface">
     <ul class="px-6 py-3 grid gap-2">
       {navItems.map((item) => (
         <li>

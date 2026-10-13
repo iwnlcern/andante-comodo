@@ -13,11 +13,12 @@ import { obfuscateEmail } from '#lib/contact-obfuscation.mjs';
 import { withTrailingSlash } from '#lib/internal-href.mjs';
 
 const homeEntries = homeCollections();
+const eyebrowTerms = site.hero.eyebrow.split(/\s*\|\s*/);
 const contactEmail = obfuscateEmail(site.email); // obfuscated in static HTML; a client script reassembles the mailto:
 const limitFor = (entry) => entry.home.limit ?? Number.POSITIVE_INFINITY;
 
 const allPosts = await getCollection('blog', listable);
-const allProjects = await getCollection('projects');
+const allProjects = await getCollection('projects', listable);
 const allGarden = await getCollection('garden');
 const allReading = await getCollection('reading');
 
@@ -30,23 +31,28 @@ const workAccent = accentVar(requiredCollection('works').accent);
 <BaseLayout title={site.name} description={site.meta.description}>
   <section class="mb-10 grid gap-8 md:grid-cols-[minmax(0,1fr)_16rem] md:items-start lg:grid-cols-[minmax(0,1fr)_17rem]">
     <div>
-      <p class="mb-4 text-xs uppercase tracking-[0.32em] text-text-secondary">
-        {site.hero.eyebrow}
+      <p class="mb-4 flex flex-wrap gap-x-[0.9em] text-xs uppercase tracking-[0.32em] text-text-secondary sm:block">
+        {eyebrowTerms.map((term, index) => (
+          <>
+            {index > 0 && <span aria-hidden="true" class="hidden sm:inline"> | </span>}
+            <span class="whitespace-nowrap">{term}</span>
+          </>
+        ))}
       </p>
       <h1 class="mb-5 max-w-3xl hero-title font-display text-text-primary">
         {site.hero.headline}
       </h1>
       <p class="max-w-2xl text-base leading-8 text-text-secondary md:text-lg">
         {site.hero.bio}
-        <a href={withTrailingSlash(site.hero.bioLink.href)} class="hl-link">{site.hero.bioLink.label} &rarr;</a>
+        <a href={withTrailingSlash(site.hero.bioLink.href)} class="hl-link whitespace-nowrap">{site.hero.bioLink.label} &rarr;</a>
       </p>
       <div class="mt-6 flex flex-wrap gap-3">
         {site.hero.ctas.map((cta, index) => (
           <a
             href={withTrailingSlash(cta.href)}
             class={index === 0
-              ? 'inline-flex items-center rounded-md bg-accent px-4 py-2 text-sm font-medium text-white transition hover:opacity-90'
-              : 'inline-flex items-center rounded-md border border-border px-4 py-2 text-sm font-medium text-text-primary transition hover:border-text-secondary'}
+              ? 'inline-flex items-center rounded bg-accent px-4 py-2 text-sm font-medium text-background transition hover:opacity-90'
+              : 'inline-flex items-center rounded border border-border px-4 py-2 text-sm font-medium text-text-primary transition hover:border-text-secondary'}
           >
             {cta.label}
           </a>

@@ -5,7 +5,9 @@ import { feedCollections } from '#lib/content/collection-registry.mjs';
 import { itemsForCollection } from '#lib/content/feed-items';
 
 export async function GET(context: APIContext) {
-  const lists = await Promise.all(feedCollections().map(itemsForCollection));
+  const lists = await Promise.all(
+    feedCollections().map((collection) => itemsForCollection(collection, context.site!.toString())),
+  );
   const items = lists.flat().sort((a, b) => b.pubDate.valueOf() - a.pubDate.valueOf());
 
   return rss({

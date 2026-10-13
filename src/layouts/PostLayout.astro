@@ -3,6 +3,7 @@ import EntryLayout from './EntryLayout.astro';
 import EpistemicStatus from '#components/post/EpistemicStatus.astro';
 import PostMeta from '#components/post/PostMeta.astro';
 import ReplyByEmail from '#components/post/ReplyByEmail.astro';
+import NewsletterSignup from '#components/newsletter/NewsletterSignup.astro';
 
 interface Heading {
   depth: number;
@@ -34,6 +35,7 @@ interface Props {
   datePublished?: Date;
   dateModified?: Date;
   replyByEmail?: boolean;
+  newsletter?: boolean;
 }
 
 const {
@@ -54,6 +56,7 @@ const {
   datePublished,
   dateModified,
   replyByEmail = false,
+  newsletter = false,
 } = Astro.props;
 ---
 
@@ -81,4 +84,9 @@ const {
   {epistemic && <EpistemicStatus slot="before-body" value={epistemic} />}
   <slot />
   {replyByEmail && <ReplyByEmail title={title} />}
+  {newsletter && (
+    <div class="not-prose mt-12">
+      <NewsletterSignup />
+    </div>
+  )}
 </EntryLayout>
